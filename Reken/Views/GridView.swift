@@ -10,8 +10,8 @@ import Combine
 
 class GridView: UIView {
 
-    var tapPublisher: AnyPublisher<CGPoint, Never> { tapSubject.eraseToAnyPublisher() }
-    private lazy var tapSubject = PassthroughSubject<CGPoint, Never>()
+    var tapPublisher: AnyPublisher<Point, Never> { tapSubject.eraseToAnyPublisher() }
+    private lazy var tapSubject = PassthroughSubject<Point, Never>()
     private var size: Int!
     private lazy var cells = [[UIView]]()
     private lazy var cancellables = Set<AnyCancellable>()
@@ -20,6 +20,23 @@ class GridView: UIView {
         self.init()
         self.size = size
         makeCells()
+    }
+
+    func addPiece(_ piece: Piece) {
+        guard let cell = cells[piece.location] else { return }
+        let pieceView = PieceView(piece: piece, size: cell.frame.width)
+        addSubview(pieceView)
+        pieceView.snp.makeConstraints { make in
+            make.center.equalTo(cell)
+        }
+        layoutIfNeeded()
+        pieceView.limbs.forEach {
+            guard let limbCell = cells[$0.limb.location(piece: piece)] else { return }
+            $0.makeConstraints(positionView: limbCell)
+        }
+        UIView.animate(withDuration: 0.3) {
+            self.layoutIfNeeded()
+        }
     }
 
     private func makeCells() {
@@ -35,7 +52,7 @@ class GridView: UIView {
                 cells[x].append(cell)
 
                 cell.tapPublisher
-                    .sink { [weak self] in self?.handleTap(location: CGPoint(x: x, y: y)) }
+                    .sink { [weak self] in self?.handleTap(location: Point(x: x, y: y)) }
                     .store(in: &cancellables)
                 makeConstraints(for: cell, y: y, prevCell: prevCell)
 
@@ -64,7 +81,7 @@ class GridView: UIView {
         }
     }
 
-    private func handleTap(location: CGPoint) {
+    private func handleTap(location: Point) {
         tapSubject.send(location)
     }
 }

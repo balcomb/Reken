@@ -28,7 +28,8 @@ class GameViewController: UIViewController {
         }
     }
 
-    private func handleTap(location: CGPoint) {
-        print("\(Int(location.x)), \(Int(location.y))")
+    private func handleTap(location: Point) {
+        print("\(location.x), \(location.y)")
+        grid.addPiece(Piece(location: location))
     }
 }
