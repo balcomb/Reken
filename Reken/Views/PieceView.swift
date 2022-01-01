@@ -9,79 +9,77 @@ import UIKit
 
 class PieceView: UIView {
 
-    var piece: Piece!
-    lazy var anchor = UIView()
-    lazy var limbs = [LimbView]()
+    lazy var stems = [StemView]()
+    private lazy var anchorView = UIView()
 
-    convenience init(piece: Piece, size: CGFloat) {
+    convenience init(anchor: Anchor, size: CGFloat) {
         self.init()
-        self.piece = piece
         snp.makeConstraints { make in
             make.width.height.equalTo(size)
         }
         let anchorSize = size * 0.7
-        addSubview(anchor)
-        anchor.backgroundColor = .blue
-        anchor.layer.cornerRadius = anchorSize / 2
-        anchor.snp.makeConstraints { make in
+        addSubview(anchorView)
+        anchorView.backgroundColor = .blue
+        anchorView.layer.cornerRadius = anchorSize / 2
+        anchorView.snp.makeConstraints { make in
             make.width.height.equalTo(anchorSize)
             make.center.equalToSuperview()
         }
-        addLimbs(size: size / 2)
+        addStems(size: size / 2)
     }
 
-    func addLimbs(size: CGFloat) {
-        Piece.Limb.allCases.forEach {
-            let limbView = LimbView(limb: $0, size: size)
-            limbs.append(limbView)
-            insertSubview(limbView, belowSubview: anchor)
-            limbView.makeConstraints(positionView: anchor)
-            limbView.snp.makeConstraints { make in
+    private func addStems(size: CGFloat) {
+        Stem.Direction.allCases.forEach {
+            let stemView = StemView(direction: $0, size: size)
+            stems.append(stemView)
+            insertSubview(stemView, belowSubview: anchorView)
+            stemView.makeConstraints(positionView: anchorView)
+            stemView.snp.makeConstraints { make in
                 make.edges.equalToSuperview()
             }
         }
     }
 
-    class LimbView: UIView {
-        var limb: Piece.Limb!
-        var size: CGFloat = 0
+    class StemView: UIView {
+        var direction: Stem.Direction!
+        private var size: CGFloat = 0
 
-        lazy var tab: UIView = {
+        private lazy var tab: UIView = {
             let tab = UIView()
             tab.backgroundColor = .gray
             tab.layer.cornerRadius = size / 2
             return tab
         }()
 
-        lazy var connector: UIView = {
+        private lazy var connector: UIView = {
             let connector = UIView()
             connector.backgroundColor = .init(white: 0.5, alpha: 0.5)
             return connector
         }()
 
-        convenience init(limb: Piece.Limb, size: CGFloat) {
+        convenience init(direction: Stem.Direction, size: CGFloat) {
             self.init()
-            self.limb = limb
+            self.direction = direction
             self.size = size
             addSubview(connector)
             addSubview(tab)
 
             let inset: CGFloat = 2
             connector.snp.makeConstraints { make in
-                switch limb {
-                case .left:
+                switch direction {
+                case .west:
                     make.left.equalTo(tab.snp.centerX)
                     make.right.equalTo(snp.centerX)
                     make.top.bottom.equalTo(tab).inset(inset)
-                case .right:
+                case .east:
                     make.right.equalTo(tab.snp.centerX)
                     make.left.equalTo(snp.centerX)
                     make.top.bottom.equalTo(tab).inset(inset)
-                case .up:
+                case .north:
                     make.top.equalTo(tab.snp.centerY)
                     make.bottom.equalTo(snp.centerY)
                     make.left.right.equalTo(tab).inset(inset)
-                case .down:
+                case .south:
                     make.bottom.equalTo(tab.snp.centerY)
                     make.top.equalTo(snp.centerY)
                     make.left.right.equalTo(tab).inset(inset)

@@ -11,7 +11,8 @@ import Combine
 
 class GameViewController: UIViewController {
 
-    private lazy var grid = GridView(size: 12)
+    lazy var board = Board()
+    private lazy var grid = GridView(size: Board.gridSize)
     private lazy var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
@@ -30,6 +31,7 @@ class GameViewController: UIViewController {
 
     private func handleTap(location: Point) {
         print("\(location.x), \(location.y)")
-        grid.addPiece(Piece(location: location))
+        guard let anchor = board.addAnchor(at: location) else { return }
+        grid.addPiece(anchor: anchor)
     }
 }

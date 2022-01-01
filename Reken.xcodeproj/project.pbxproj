@@ -19,6 +19,7 @@
 		B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FCDBD276EAE6A00F8B39C /* PieceView.swift */; };
 		B5ADF68527695A2A0036DA7E /* GridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68427695A2A0036DA7E /* GridView.swift */; };
 		B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68627695A6D0036DA7E /* CellView.swift */; };
+		B5E12477277FBBAA007222C3 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12476277FBBAA007222C3 /* Board.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		B57FCDBD276EAE6A00F8B39C /* PieceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceView.swift; sourceTree = "<group>"; };
 		B5ADF68427695A2A0036DA7E /* GridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridView.swift; sourceTree = "<group>"; };
 		B5ADF68627695A6D0036DA7E /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
+		B5E12476277FBBAA007222C3 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
 		F3E6AE56D2BCED53B24AF550 /* Pods-Reken.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Reken.release.xcconfig"; path = "Target Support Files/Pods-Reken/Pods-Reken.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -100,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				B57FCDBB276EAE4B00F8B39C /* Piece.swift */,
+				B5E12476277FBBAA007222C3 /* Board.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 				B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */,
 				B56064AF2752EBB1006BF7DD /* AppDelegate.swift in Sources */,
 				B5ADF68527695A2A0036DA7E /* GridView.swift in Sources */,
+				B5E12477277FBBAA007222C3 /* Board.swift in Sources */,
 				B56064B12752EBB1006BF7DD /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

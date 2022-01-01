@@ -19,22 +19,31 @@ extension Array where Element : Collection, Element.Index == Int {
     }
 }
 
-struct Piece {
+protocol Piece {
+    var location: Point { get }
+}
+
+struct Anchor: Piece {
     let location: Point
-    var limbs: [Limb] = Limb.allCases
+    var stems: [Stem] = []
+}
 
-    enum Limb: CaseIterable {
-        case left, right, up, down
+struct Stem: Piece {
+    let anchor: Anchor
+    let direction: Direction
 
-        func location(piece: Piece) -> Point {
-            var location = piece.location
-            switch self {
-            case .left: location.x -= 1
-            case .right: location.x += 1
-            case .up: location.y -= 1
-            case .down: location.y += 1
-            }
-            return location
+    var location: Point {
+        var location = anchor.location
+        switch direction {
+        case .north: location.y -= 1
+        case .south: location.y += 1
+        case .east: location.x += 1
+        case .west: location.x -= 1
         }
+        return location
+    }
+
+    enum Direction: CaseIterable {
+        case north, south, east, west
     }
 }

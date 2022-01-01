@@ -22,17 +22,21 @@ class GridView: UIView {
         makeCells()
     }
 
-    func addPiece(_ piece: Piece) {
-        guard let cell = cells[piece.location] else { return }
-        let pieceView = PieceView(piece: piece, size: cell.frame.width)
+    func addPiece(anchor: Anchor) {
+        guard let cell = cells[anchor.location] else { return }
+        let pieceView = PieceView(anchor: anchor, size: cell.frame.width)
         addSubview(pieceView)
         pieceView.snp.makeConstraints { make in
             make.center.equalTo(cell)
         }
         layoutIfNeeded()
-        pieceView.limbs.forEach {
-            guard let limbCell = cells[$0.limb.location(piece: piece)] else { return }
-            $0.makeConstraints(positionView: limbCell)
+        anchor.stems.forEach { stem in
+            guard let stemCell = cells[stem.location],
+                  let stemView = pieceView.stems.first(where: { $0.direction == stem.direction })
+            else {
+                return
+            }
+            stemView.makeConstraints(positionView: stemCell)
         }
         UIView.animate(withDuration: 0.3) {
             self.layoutIfNeeded()
@@ -50,15 +54,17 @@ class GridView: UIView {
                 let cell = CellView()
                 addSubview(cell)
                 cells[x].append(cell)
-
-                cell.tapPublisher
-                    .sink { [weak self] in self?.handleTap(location: Point(x: x, y: y)) }
-                    .store(in: &cancellables)
+                setUpPublisher(cell: cell, location: (x, y))
                 makeConstraints(for: cell, y: y, prevCell: prevCell)
-
                 prevCell = cell
             }
         }
+    }
+
+    private func setUpPublisher(cell: CellView, location: Point) {
+        cell.tapPublisher.sink { [weak self] in
+            self?.tapSubject.send(location)
+        }.store(in: &cancellables)
     }
 
     private func makeConstraints(for cell: CellView, y: Int, prevCell: CellView?) {
@@ -79,9 +85,5 @@ class GridView: UIView {
             make.width.equalToSuperview().dividedBy(size)
             make.height.equalTo(cell.snp.width)
         }
-    }
-
-    private func handleTap(location: Point) {
-        tapSubject.send(location)
     }
 }
