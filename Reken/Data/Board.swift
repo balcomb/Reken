@@ -16,9 +16,9 @@ struct Board {
         count: Self.gridSize
     )
 
-    mutating func addAnchor(at location: Point) -> Anchor? {
+    mutating func addAnchor(at location: Point, player: GameLogic.Player) -> Anchor? {
         guard nodeIsEmpty(at: location) else { return nil }
-        var anchor = Anchor(location: location)
+        var anchor = Anchor(location: location, player: player)
         updateNode(with: anchor)
         Stem.Direction.allCases.forEach {
             let stem = Stem(anchor: anchor, direction: $0)

@@ -9,31 +9,60 @@ import UIKit
 
 class PieceView: UIView {
 
-    lazy var stems = [StemView]()
-    private lazy var anchorView = UIView()
+    static var blue: UIColor { .init(red: 0, green: 0.5, blue: 0.85, alpha: 1) }
+    static var orange: UIColor { .init(red: 0.9, green: 0.5, blue: 0, alpha: 1) }
 
-    convenience init(anchor: Anchor, size: CGFloat) {
+    lazy var stems = [StemView]()
+    private var anchor: Anchor!
+    private var size: CGFloat = 0
+
+    private lazy var anchorView: UIView = {
+        let anchorView = UIView()
+        let color = anchor.player == .blue ? Self.blue : Self.orange
+        let alpha: CGFloat = {
+            guard anchor.score != Stem.Direction.allCases.count else { return 1 }
+            return CGFloat(anchor.score) * 0.2
+        }()
+        anchorView.backgroundColor = color.withAlphaComponent(alpha)
+        anchorView.layer.borderColor = color.cgColor
+        anchorView.layer.borderWidth = size * 0.25
+        anchorView.layer.cornerRadius = anchorContainer.layer.cornerRadius
+        return anchorView
+    }()
+
+    private lazy var anchorContainer: UIView = {
+        let anchorContainer = UIView()
+        anchorContainer.layer.masksToBounds = true
+        anchorContainer.backgroundColor = .white
+        anchorContainer.layer.cornerRadius = size / 2
+        return anchorContainer
+    }()
+
+    convenience init(anchor: Anchor, cellSize: CGFloat) {
         self.init()
+        self.anchor = anchor
+        self.size = cellSize * 0.7
         snp.makeConstraints { make in
             make.width.height.equalTo(size)
         }
-        let anchorSize = size * 0.7
-        addSubview(anchorView)
-        anchorView.backgroundColor = .blue
-        anchorView.layer.cornerRadius = anchorSize / 2
-        anchorView.snp.makeConstraints { make in
-            make.width.height.equalTo(anchorSize)
+        addSubview(anchorContainer)
+        anchorContainer.addSubview(anchorView)
+        anchorContainer.snp.makeConstraints { make in
+            make.width.height.equalTo(size)
             make.center.equalToSuperview()
         }
-        addStems(size: size / 2)
+        anchorView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        addStems(size: size * 0.6)
     }
 
     private func addStems(size: CGFloat) {
         Stem.Direction.allCases.forEach {
             let stemView = StemView(direction: $0, size: size)
             stems.append(stemView)
-            insertSubview(stemView, belowSubview: anchorView)
-            stemView.makeConstraints(positionView: anchorView)
+            insertSubview(stemView, belowSubview: anchorContainer)
+            stemView.makeConstraints(positionView: anchorContainer)
             stemView.snp.makeConstraints { make in
                 make.edges.equalToSuperview()
             }
@@ -64,7 +93,7 @@ class PieceView: UIView {
             addSubview(connector)
             addSubview(tab)
 
-            let inset: CGFloat = 2
+            let inset: CGFloat = size * 0.15
             connector.snp.makeConstraints { make in
                 switch direction {
                 case .west:

@@ -25,7 +25,9 @@ protocol Piece {
 
 struct Anchor: Piece {
     let location: Point
+    let player: GameLogic.Player
     var stems: [Stem] = []
+    var score: Int { Stem.Direction.allCases.count - stems.count }
 }
 
 struct Stem: Piece {

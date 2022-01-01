@@ -11,13 +11,13 @@ import Combine
 
 class GameViewController: UIViewController {
 
-    lazy var board = Board()
+    private lazy var gameLogic = GameLogic()
     private lazy var grid = GridView(size: Board.gridSize)
     private lazy var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .gray
+        view.backgroundColor = .lightGray
         view.addSubview(grid)
         grid.tapPublisher.sink { [weak self] in self?.handleTap(location: $0) }
             .store(in: &cancellables)
@@ -31,7 +31,7 @@ class GameViewController: UIViewController {
 
     private func handleTap(location: Point) {
         print("\(location.x), \(location.y)")
-        guard let anchor = board.addAnchor(at: location) else { return }
+        guard let anchor = gameLogic.addAnchor(at: location) else { return }
         grid.addPiece(anchor: anchor)
     }
 }

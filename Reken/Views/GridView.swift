@@ -24,7 +24,7 @@ class GridView: UIView {
 
     func addPiece(anchor: Anchor) {
         guard let cell = cells[anchor.location] else { return }
-        let pieceView = PieceView(anchor: anchor, size: cell.frame.width)
+        let pieceView = PieceView(anchor: anchor, cellSize: cell.frame.width)
         addSubview(pieceView)
         pieceView.snp.makeConstraints { make in
             make.center.equalTo(cell)
