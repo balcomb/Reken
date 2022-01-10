@@ -57,6 +57,16 @@ class PieceView: UIView {
         addStems(size: size * 0.6)
     }
 
+    func updateView(with anchor: Anchor) {
+        let color = anchor.player == .blue ? Self.blue : Self.orange
+        let alpha: CGFloat = {
+            guard anchor.score != Stem.Direction.allCases.count else { return 1 }
+            return CGFloat(anchor.score) * 0.2
+        }()
+        anchorView.backgroundColor = color.withAlphaComponent(alpha)
+        anchorView.layer.borderColor = color.cgColor
+    }
+
     private func addStems(size: CGFloat) {
         Stem.Direction.allCases.forEach {
             let stemView = StemView(direction: $0, size: size)
@@ -66,6 +76,12 @@ class PieceView: UIView {
             stemView.snp.makeConstraints { make in
                 make.edges.equalToSuperview()
             }
+        }
+    }
+
+    func resetStems() {
+        stems.forEach {
+            $0.makeConstraints(positionView: self)
         }
     }
 

@@ -25,9 +25,32 @@ protocol Piece {
 
 struct Anchor: Piece {
     let location: Point
-    let player: GameLogic.Player
+    var player: GameLogic.Player
     var stems: [Stem] = []
     var score: Int { Stem.Direction.allCases.count - stems.count }
+
+    func getLocation(for diagonal: Diagonal) -> Point {
+        var location = location
+        switch diagonal {
+        case .northwest:
+            location.x -= 1
+            location.y -= 1
+        case .northeast:
+            location.x += 1
+            location.y -= 1
+        case .southeast:
+            location.x += 1
+            location.y += 1
+        case .southwest:
+            location.x -= 1
+            location.y += 1
+        }
+        return location
+    }
+
+    enum Diagonal: CaseIterable {
+        case northwest, northeast, southeast, southwest
+    }
 }
 
 struct Stem: Piece {

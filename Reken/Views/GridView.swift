@@ -14,6 +14,10 @@ class GridView: UIView {
     private lazy var tapSubject = PassthroughSubject<Point, Never>()
     private var size: Int!
     private lazy var cells = [[UIView]]()
+    private lazy var pieces: [[UIView]] = Array(
+        repeating: Array(repeating: UIView(), count: Board.gridSize),
+        count: Board.gridSize
+    )
     private lazy var cancellables = Set<AnyCancellable>()
 
     convenience init(size: Int) {
@@ -22,14 +26,30 @@ class GridView: UIView {
         makeCells()
     }
 
-    func addPiece(anchor: Anchor) {
+    func updatePieces(moveResult: MoveResult) {
+        addAnchor(moveResult.newPiece)
+        moveResult.capturedAnchors.forEach {
+            resetStems(for: $0)
+        }
+        moveResult.updatedAnchors.forEach {
+            updateStems(for: $0)
+        }
+    }
+
+    private func addAnchor(_ anchor: Anchor) {
         guard let cell = cells[anchor.location] else { return }
         let pieceView = PieceView(anchor: anchor, cellSize: cell.frame.width)
+        pieces[anchor.location.x][anchor.location.y] = pieceView
         addSubview(pieceView)
         pieceView.snp.makeConstraints { make in
             make.center.equalTo(cell)
         }
         layoutIfNeeded()
+        updateStems(for: anchor)
+    }
+
+    private func updateStems(for anchor: Anchor) {
+        guard let pieceView = pieces[anchor.location] as? PieceView else { return }
         anchor.stems.forEach { stem in
             guard let stemCell = cells[stem.location],
                   let stemView = pieceView.stems.first(where: { $0.direction == stem.direction })
@@ -40,7 +60,14 @@ class GridView: UIView {
         }
         UIView.animate(withDuration: 0.3) {
             self.layoutIfNeeded()
+            pieceView.updateView(with: anchor)
         }
+    }
+
+    private func resetStems(for anchor: Anchor) {
+        guard let pieceView = pieces[anchor.location] as? PieceView else { return }
+        pieceView.resetStems()
+        pieceView.updateView(with: anchor)
     }
 
     private func makeCells() {

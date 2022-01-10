@@ -7,26 +7,24 @@
 
 import Foundation
 
+typealias MoveResult = (newPiece: Anchor, updatedAnchors: [Anchor], capturedAnchors: [Anchor])
+typealias Score = (blue: Int, orange: Int)
+
 class GameLogic {
 
     private lazy var board = Board()
     private var activePlayer: Player = .blue
-    private lazy var score: (blue: Int, orange: Int) = (0, 0)
+    var score: Score { board.score }
 
-    func addAnchor(at location: Point) -> Anchor? {
-        let anchor = board.addAnchor(at: location, player: activePlayer)
-        update(with: anchor)
-        return anchor
-    }
-
-    private func update(with anchor: Anchor?) {
-        guard let anchor = anchor else { return }
-        switch activePlayer {
-        case .blue: score.blue += anchor.score
-        case .orange: score.orange += anchor.score
-        }
+    func addAnchor(at location: Point) -> MoveResult? {
+        guard let result = board.addAnchor(at: location, player: activePlayer) else { return nil }
         print(score)
         activePlayer = activePlayer.opponent
+        return result
+    }
+
+    func autoMove() -> Point? {
+        board.autoMove(player: self.activePlayer)
     }
 }
 
