@@ -16,6 +16,16 @@ struct Board {
         count: Self.gridSize
     )
 
+    var emptyLocations: [Point] {
+        var emptyLocations = [Point]()
+        for (x, column) in nodes.enumerated() {
+            for (y, node) in column.enumerated() {
+                if node.piece == nil { emptyLocations.append((x, y)) }
+            }
+        }
+        return emptyLocations
+    }
+
     var score: Score {
         var score: Score = (0, 0)
         let anchors = nodes.joined().compactMap { $0.piece as? Anchor }
@@ -28,32 +38,12 @@ struct Board {
         return score
     }
 
-    func getAnchor(at location: Point) -> Anchor? {
-        nodes[location]?.piece as? Anchor
+    func getNode(at location: Point) -> Node? {
+        nodes[location]
     }
 
-    func autoMove(player: GameLogic.Player) -> Point? {
-        var empties = [Point]()
-        for (x, column) in nodes.enumerated() {
-            for (y, node) in column.enumerated() {
-                if node.piece == nil { empties.append((x, y)) }
-            }
-        }
-        var candidates = [(location: Point, scoreDiff: Int)]()
-        empties.forEach {
-            var boardCopy = self
-            guard let _ = boardCopy.addAnchor(at: $0, player: player) else { return }
-            let scoreDiff: Int
-            switch player {
-            case .blue: scoreDiff = boardCopy.score.blue - boardCopy.score.orange
-            case .orange: scoreDiff = boardCopy.score.orange - boardCopy.score.blue
-            }
-            candidates.append(($0, scoreDiff))
-        }
-        candidates = candidates.sorted { $0.scoreDiff > $1.scoreDiff }
-        guard let maxScoreDiff = candidates.first?.scoreDiff else { return nil }
-        candidates = candidates.filter { $0.scoreDiff == maxScoreDiff }
-        return candidates.randomElement()?.location
+    private func getAnchor(at location: Point) -> Anchor? {
+        nodes[location]?.piece as? Anchor
     }
 
     mutating func addAnchor(at location: Point, player: GameLogic.Player) -> MoveResult? {
@@ -83,13 +73,13 @@ struct Board {
         return result
     }
 
-    mutating func removePiece(at location: Point) {
+    private mutating func removePiece(at location: Point) {
         guard var node = nodes[location] else { return }
         node.piece = nil
         nodes[location.x][location.y] = node
     }
 
-    mutating func updateStems(for anchor: Anchor) -> Anchor {
+    private mutating func updateStems(for anchor: Anchor) -> Anchor {
         var anchor = anchor
         Stem.Direction.allCases.forEach {
             let stem = Stem(anchor: anchor, direction: $0)
@@ -106,7 +96,7 @@ struct Board {
         return node.piece == nil
     }
 
-    mutating func updateNode(with piece: Piece) {
+    private mutating func updateNode(with piece: Piece) {
         guard var node = nodes[piece.location] else { return }
         node.piece = piece
         nodes[piece.location.x][piece.location.y] = node

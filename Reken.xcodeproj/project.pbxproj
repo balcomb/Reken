@@ -17,6 +17,8 @@
 		B56064C32752F10B006BF7DD /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = B56064C22752F10B006BF7DD /* Podfile */; };
 		B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FCDBB276EAE4B00F8B39C /* Piece.swift */; };
 		B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FCDBD276EAE6A00F8B39C /* PieceView.swift */; };
+		B597BB2C279336A80081D417 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2B279336A80081D417 /* ScoreboardView.swift */; };
+		B597BB2E279340150081D417 /* Automaton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2D279340150081D417 /* Automaton.swift */; };
 		B5ADF68527695A2A0036DA7E /* GridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68427695A2A0036DA7E /* GridView.swift */; };
 		B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68627695A6D0036DA7E /* CellView.swift */; };
 		B5E12477277FBBAA007222C3 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12476277FBBAA007222C3 /* Board.swift */; };
@@ -37,6 +39,8 @@
 		B56064C22752F10B006BF7DD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B57FCDBB276EAE4B00F8B39C /* Piece.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Piece.swift; sourceTree = "<group>"; };
 		B57FCDBD276EAE6A00F8B39C /* PieceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceView.swift; sourceTree = "<group>"; };
+		B597BB2B279336A80081D417 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
+		B597BB2D279340150081D417 /* Automaton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Automaton.swift; sourceTree = "<group>"; };
 		B5ADF68427695A2A0036DA7E /* GridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridView.swift; sourceTree = "<group>"; };
 		B5ADF68627695A6D0036DA7E /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
 		B5E12476277FBBAA007222C3 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
@@ -106,6 +110,7 @@
 			children = (
 				B57FCDBB276EAE4B00F8B39C /* Piece.swift */,
 				B5E12476277FBBAA007222C3 /* Board.swift */,
+				B597BB2D279340150081D417 /* Automaton.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -116,6 +121,7 @@
 				B5ADF68427695A2A0036DA7E /* GridView.swift */,
 				B5ADF68627695A6D0036DA7E /* CellView.swift */,
 				B57FCDBD276EAE6A00F8B39C /* PieceView.swift */,
+				B597BB2B279336A80081D417 /* ScoreboardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -230,7 +236,9 @@
 				B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */,
 				B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */,
 				B5E124792780F71A007222C3 /* GameLogic.swift in Sources */,
+				B597BB2C279336A80081D417 /* ScoreboardView.swift in Sources */,
 				B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */,
+				B597BB2E279340150081D417 /* Automaton.swift in Sources */,
 				B56064AF2752EBB1006BF7DD /* AppDelegate.swift in Sources */,
 				B5ADF68527695A2A0036DA7E /* GridView.swift in Sources */,
 				B5E12477277FBBAA007222C3 /* Board.swift in Sources */,

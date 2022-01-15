@@ -26,7 +26,7 @@ class GridView: UIView {
         makeCells()
     }
 
-    func updatePieces(moveResult: MoveResult) {
+    func update(with moveResult: MoveResult) {
         addAnchor(moveResult.newPiece)
         moveResult.capturedAnchors.forEach {
             resetStems(for: $0)

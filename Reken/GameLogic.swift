@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 typealias MoveResult = (newPiece: Anchor, updatedAnchors: [Anchor], capturedAnchors: [Anchor])
 typealias Score = (blue: Int, orange: Int)
@@ -13,18 +14,34 @@ typealias Score = (blue: Int, orange: Int)
 class GameLogic {
 
     private lazy var board = Board()
-    private var activePlayer: Player = .blue
-    var score: Score { board.score }
+    private var state = State.initial
 
-    func addAnchor(at location: Point) -> MoveResult? {
-        guard let result = board.addAnchor(at: location, player: activePlayer) else { return nil }
-        print(score)
-        activePlayer = activePlayer.opponent
-        return result
+    var moveResultPublisher: AnyPublisher<MoveResult, Never> {
+        moveResultSubject.eraseToAnyPublisher()
+    }
+    private lazy var moveResultSubject = PassthroughSubject<MoveResult, Never>()
+
+    var statePublisher: AnyPublisher<State, Never> { stateSubject.eraseToAnyPublisher() }
+    private lazy var stateSubject = PassthroughSubject<State, Never>()
+
+    func handleMove(at location: Point, isAutoMove: Bool = false) {
+        guard (state.activePlayer == .blue || isAutoMove),
+              let result = board.addAnchor(at: location, player: state.activePlayer)
+        else {
+            return
+        }
+        state.activePlayer = state.activePlayer.opponent
+        state.score = board.score
+        moveResultSubject.send(result)
+        stateSubject.send(state)
+        guard result.newPiece.player == .blue else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { self.autoMove() }
     }
 
-    func autoMove() -> Point? {
-        board.autoMove(player: self.activePlayer)
+    private func autoMove() {
+        let automaton = Automaton(player: state.activePlayer, board: board)
+        guard let location = automaton.findMove() else { return }
+        self.handleMove(at: location, isAutoMove: true)
     }
 }
 
@@ -34,5 +51,12 @@ extension GameLogic {
         case blue, orange
 
         var opponent: Player { Player.allCases.first { $0 != self }! }
+    }
+
+    struct State {
+        var activePlayer: GameLogic.Player
+        var score: Score
+
+        static var initial: State { State(activePlayer: .blue, score: (0, 0)) }
     }
 }
