@@ -9,22 +9,11 @@ import UIKit
 
 class PieceView: UIView {
 
-    static var blue: UIColor { .init(red: 0, green: 0.5, blue: 0.85, alpha: 1) }
-    static var orange: UIColor { .init(red: 0.9, green: 0.5, blue: 0, alpha: 1) }
-
     lazy var stems = [StemView]()
-    private var anchor: Anchor!
     private var size: CGFloat = 0
 
     private lazy var anchorView: UIView = {
         let anchorView = UIView()
-        let color = anchor.player == .blue ? Self.blue : Self.orange
-        let alpha: CGFloat = {
-            guard anchor.score != Stem.Direction.allCases.count else { return 1 }
-            return CGFloat(anchor.score) * 0.2
-        }()
-        anchorView.backgroundColor = color.withAlphaComponent(alpha)
-        anchorView.layer.borderColor = color.cgColor
         anchorView.layer.borderWidth = size * 0.25
         anchorView.layer.cornerRadius = anchorContainer.layer.cornerRadius
         return anchorView
@@ -40,13 +29,13 @@ class PieceView: UIView {
 
     convenience init(anchor: Anchor, cellSize: CGFloat) {
         self.init()
-        self.anchor = anchor
         self.size = cellSize * 0.7
         snp.makeConstraints { make in
             make.width.height.equalTo(size)
         }
         addSubview(anchorContainer)
         anchorContainer.addSubview(anchorView)
+        updateView(with: anchor)
         anchorContainer.snp.makeConstraints { make in
             make.width.height.equalTo(size)
             make.center.equalToSuperview()
@@ -58,7 +47,7 @@ class PieceView: UIView {
     }
 
     func updateView(with anchor: Anchor) {
-        let color = anchor.player == .blue ? Self.blue : Self.orange
+        let color = UIColor(for: anchor.player)
         let alpha: CGFloat = {
             guard anchor.score != Stem.Direction.allCases.count else { return 1 }
             return CGFloat(anchor.score) * 0.2
@@ -98,7 +87,7 @@ class PieceView: UIView {
 
         private lazy var connector: UIView = {
             let connector = UIView()
-            connector.backgroundColor = .init(white: 0.5, alpha: 0.5)
+            connector.backgroundColor = .connectorBackground
             return connector
         }()
 

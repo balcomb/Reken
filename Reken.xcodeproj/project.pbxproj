@@ -17,6 +17,7 @@
 		B56064C32752F10B006BF7DD /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = B56064C22752F10B006BF7DD /* Podfile */; };
 		B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FCDBB276EAE4B00F8B39C /* Piece.swift */; };
 		B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FCDBD276EAE6A00F8B39C /* PieceView.swift */; };
+		B58FD28C2795F7C900CF3A78 /* UIExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58FD28B2795F7C900CF3A78 /* UIExtensions.swift */; };
 		B597BB2C279336A80081D417 /* ScoreboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2B279336A80081D417 /* ScoreboardView.swift */; };
 		B597BB2E279340150081D417 /* Automaton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2D279340150081D417 /* Automaton.swift */; };
 		B5ADF68527695A2A0036DA7E /* GridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68427695A2A0036DA7E /* GridView.swift */; };
@@ -39,6 +40,7 @@
 		B56064C22752F10B006BF7DD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B57FCDBB276EAE4B00F8B39C /* Piece.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Piece.swift; sourceTree = "<group>"; };
 		B57FCDBD276EAE6A00F8B39C /* PieceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceView.swift; sourceTree = "<group>"; };
+		B58FD28B2795F7C900CF3A78 /* UIExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtensions.swift; sourceTree = "<group>"; };
 		B597BB2B279336A80081D417 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
 		B597BB2D279340150081D417 /* Automaton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Automaton.swift; sourceTree = "<group>"; };
 		B5ADF68427695A2A0036DA7E /* GridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridView.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				B5ADF68627695A6D0036DA7E /* CellView.swift */,
 				B57FCDBD276EAE6A00F8B39C /* PieceView.swift */,
 				B597BB2B279336A80081D417 /* ScoreboardView.swift */,
+				B58FD28B2795F7C900CF3A78 /* UIExtensions.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -235,6 +238,7 @@
 				B56064B32752EBB1006BF7DD /* GameViewController.swift in Sources */,
 				B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */,
 				B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */,
+				B58FD28C2795F7C900CF3A78 /* UIExtensions.swift in Sources */,
 				B5E124792780F71A007222C3 /* GameLogic.swift in Sources */,
 				B597BB2C279336A80081D417 /* ScoreboardView.swift in Sources */,
 				B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */,

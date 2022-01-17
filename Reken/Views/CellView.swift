@@ -12,17 +12,12 @@ class CellView: UIView {
 
     var tapPublisher: AnyPublisher<Void, Never> { tapSubject.eraseToAnyPublisher() }
     private lazy var tapSubject = PassthroughSubject<Void, Never>()
-
-    private lazy var background: UIView = {
-        let background = UIView()
-        background.backgroundColor = .init(white: 1, alpha: 0.8)
-        background.layer.cornerRadius = 3
-        return background
-    }()
+    private lazy var background = UIView(color: .cellBackground)
 
     override func layoutSubviews() {
-        guard !subviews.contains(background) else { return }
+        guard background.superview == nil else { return }
         addSubview(background)
+        background.layer.cornerRadius = 3
         background.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(1.5)
         }

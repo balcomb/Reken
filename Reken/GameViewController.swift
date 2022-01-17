@@ -18,7 +18,7 @@ class GameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .lightGray
+        view.backgroundColor = .gameBackground
         view.addSubview(grid)
         view.addSubview(scoreboard)
         makeConstraints()
