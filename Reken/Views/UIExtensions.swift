@@ -27,4 +27,5 @@ extension UIColor {
     static var gameBackground: UIColor { .init(white: 0.2, alpha: 1) }
     static var cellBackground: UIColor { .init(white: 0.28, alpha: 1) }
     static var connectorBackground: UIColor { .init(white: 0.4, alpha: 0.7) }
+    static var selectionBackground: UIColor { .init(white: 0.9, alpha: 1) }
 }

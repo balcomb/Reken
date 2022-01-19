@@ -11,20 +11,32 @@ import Combine
 typealias MoveResult = (newPiece: Anchor, updatedAnchors: [Anchor], capturedAnchors: [Anchor])
 typealias Score = (blue: Int, orange: Int)
 
-class GameLogic {
+class GameLogic: BoardUpdater, ScoreUpdater, EventSubscriber {
+
+    lazy var cancellables = Set<AnyCancellable>()
 
     private lazy var board = Board()
     private var state = State.initial
 
-    var moveResultPublisher: AnyPublisher<MoveResult, Never> {
-        moveResultSubject.eraseToAnyPublisher()
+    var moveResultPublisher: EventPublisher<MoveResult> { moveResultSubject.eraseToAnyPublisher() }
+    private lazy var moveResultSubject = EventSubject<MoveResult>()
+
+    var showConfirmPublisher: EventPublisher<Point> { showConfirmSubject.eraseToAnyPublisher() }
+    private lazy var showConfirmSubject = EventSubject<Point>()
+
+    var gameStatePublisher: EventPublisher<State> { gameStateSubject.eraseToAnyPublisher() }
+    private lazy var gameStateSubject = EventSubject<State>()
+
+    func addUpdater(_ updater: GameUpdater) {
+        subscribe(to: updater.selectionPublisher) { [weak self] location in
+            self?.handleSelection(at: location)
+        }
+        subscribe(to: updater.confirmPublisher) { [weak self] location in
+            self?.handleMove(at: location)
+        }
     }
-    private lazy var moveResultSubject = PassthroughSubject<MoveResult, Never>()
 
-    var statePublisher: AnyPublisher<State, Never> { stateSubject.eraseToAnyPublisher() }
-    private lazy var stateSubject = PassthroughSubject<State, Never>()
-
-    func handleMove(at location: Point, isAutoMove: Bool = false) {
+    private func handleMove(at location: Point, isAutoMove: Bool = false) {
         guard (state.activePlayer == .blue || isAutoMove),
               let result = board.addAnchor(at: location, player: state.activePlayer)
         else {
@@ -33,9 +45,14 @@ class GameLogic {
         state.activePlayer = state.activePlayer.opponent
         state.score = board.score
         moveResultSubject.send(result)
-        stateSubject.send(state)
+        gameStateSubject.send(state)
         guard result.newPiece.player == .blue else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { self.autoMove() }
+    }
+
+    private func handleSelection(at location: Point) {
+        guard state.activePlayer == .blue && board.nodeIsEmpty(at: location) else { return }
+        showConfirmSubject.send(location)
     }
 
     private func autoMove() {

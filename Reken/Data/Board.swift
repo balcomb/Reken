@@ -91,7 +91,7 @@ struct Board {
         return anchor
     }
 
-    private func nodeIsEmpty(at location: Point) -> Bool {
+    func nodeIsEmpty(at location: Point) -> Bool {
         guard let node = nodes[location] else { return false }
         return node.piece == nil
     }

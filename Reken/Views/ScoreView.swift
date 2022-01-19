@@ -1,13 +1,16 @@
 //
-//  ScoreboardView.swift
+//  ScoreView.swift
 //  Reken
 //
 //  Created by Ben Balcomb on 1/15/22.
 //
 
 import UIKit
+import Combine
 
-class ScoreboardView: UIView {
+class ScoreView: UIView, EventSubscriber {
+
+    lazy var cancellables = Set<AnyCancellable>()
 
     private var views: [UIView] { [blueLabel, orangeLabel, separator, indicator] }
     private lazy var blueLabel = makeScoreLabel(for: .blue)
@@ -22,7 +25,11 @@ class ScoreboardView: UIView {
         makeConstraints()
     }
 
-    func setState(_ state: GameLogic.State) {
+    func addUpdater(_ updater: ScoreUpdater) {
+        subscribe(to: updater.gameStatePublisher) { [weak self] in self?.setState($0) }
+    }
+
+    private func setState(_ state: GameLogic.State) {
         blueLabel.attributedText = makeAttributedText(with: state, for: .blue)
         orangeLabel.attributedText = makeAttributedText(with: state, for: .orange)
         layoutIfNeeded()

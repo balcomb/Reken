@@ -1,5 +1,5 @@
 //
-//  GridView.swift
+//  BoardView.swift
 //  Reken
 //
 //  Created by Ben Balcomb on 12/14/21.
@@ -8,17 +8,29 @@
 import UIKit
 import Combine
 
-class GridView: UIView {
+class BoardView: UIView, EventSubscriber, GameUpdater {
 
-    var tapPublisher: AnyPublisher<Point, Never> { tapSubject.eraseToAnyPublisher() }
-    private lazy var tapSubject = PassthroughSubject<Point, Never>()
+    lazy var cancellables = Set<AnyCancellable>()
+
+    var selectionPublisher: EventPublisher<Point> { selectionSubject.eraseToAnyPublisher() }
+    private lazy var selectionSubject = EventSubject<Point>()
+
+    var confirmPublisher: EventPublisher<Point> { confirmSubject.eraseToAnyPublisher() }
+    private lazy var confirmSubject = EventSubject<Point>()
+
     private var size: Int!
-    private lazy var cells = [[UIView]]()
+    private var selectedLocation: Point?
+    private lazy var cells = [[CellView]]()
     private lazy var pieces: [[UIView]] = Array(
         repeating: Array(repeating: UIView(), count: Board.gridSize),
         count: Board.gridSize
     )
-    private lazy var cancellables = Set<AnyCancellable>()
+    private lazy var confirmView: ConfirmView = {
+        let confirmView = ConfirmView()
+        superview?.addSubview(confirmView)
+        subscribe(to: confirmView.actionPublisher) { [weak self] in self?.handleConfirmAction($0) }
+        return confirmView
+    }()
 
     convenience init(size: Int) {
         self.init()
@@ -26,7 +38,24 @@ class GridView: UIView {
         makeCells()
     }
 
-    func update(with moveResult: MoveResult) {
+    func addUpdater(_ updater: BoardUpdater) {
+        subscribe(to: updater.showConfirmPublisher) { [weak self] location in
+            self?.showConfirm(at: location)
+        }
+        subscribe(to: updater.moveResultPublisher) { [weak self] moveResult in
+            self?.update(with: moveResult)
+        }
+    }
+
+    private func showConfirm(at location: Point) {
+        guard let cell = cells[location] else { return }
+        cell.setSelected(true)
+        if let currentLocation = selectedLocation { cells[currentLocation]?.setSelected(false) }
+        selectedLocation = location
+        confirmView.show(for: cell, isAlignedLeft: location.x < self.size / 2)
+    }
+
+    private func update(with moveResult: MoveResult) {
         addAnchor(moveResult.newPiece)
         moveResult.capturedAnchors.forEach {
             resetStems(for: $0)
@@ -34,6 +63,13 @@ class GridView: UIView {
         moveResult.updatedAnchors.forEach {
             updateStems(for: $0)
         }
+    }
+
+    private func handleConfirmAction(_ action: ConfirmView.Action) {
+        guard let location = selectedLocation else { return }
+        cells[location]?.setSelected(false)
+        selectedLocation = nil
+        if action == .confirm { confirmSubject.send(location) }
     }
 
     private func addAnchor(_ anchor: Anchor) {
@@ -90,8 +126,12 @@ class GridView: UIView {
 
     private func setUpPublisher(cell: CellView, location: Point) {
         cell.tapPublisher.sink { [weak self] in
-            self?.tapSubject.send(location)
+            self?.handleTap(cell: cell, location: location)
         }.store(in: &cancellables)
+    }
+
+    private func handleTap(cell: CellView, location: Point) {
+        selectionSubject.send(location)
     }
 
     private func makeConstraints(for cell: CellView, y: Int, prevCell: CellView?) {

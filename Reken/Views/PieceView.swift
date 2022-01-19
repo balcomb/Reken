@@ -49,8 +49,10 @@ class PieceView: UIView {
     func updateView(with anchor: Anchor) {
         let color = UIColor(for: anchor.player)
         let alpha: CGFloat = {
-            guard anchor.score != Stem.Direction.allCases.count else { return 1 }
-            return CGFloat(anchor.score) * 0.2
+            if anchor.score == 0 { return 1 }
+            let maxScore = Stem.Direction.allCases.count
+            if anchor.score == maxScore { return 0 }
+            return (CGFloat(maxScore - anchor.score) * 0.2) + 0.05
         }()
         anchorView.backgroundColor = color.withAlphaComponent(alpha)
         anchorView.layer.borderColor = color.cgColor
