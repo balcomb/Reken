@@ -12,13 +12,13 @@ typealias EventPublisher<O> = AnyPublisher<O, Never>
 typealias EventSubject<O> = PassthroughSubject<O, Never>
 
 protocol BoardUpdater {
-    var showConfirmPublisher: EventPublisher<Point> { get }
+    var showConfirmPublisher: EventPublisher<Board.Position> { get }
     var moveResultPublisher: EventPublisher<MoveResult> { get }
 }
 
 protocol GameUpdater {
-    var selectionPublisher: EventPublisher<Point> { get }
-    var confirmPublisher: EventPublisher<Point> { get }
+    var selectionPublisher: EventPublisher<Board.Position> { get }
+    var confirmPublisher: EventPublisher<Board.Position> { get }
 }
 
 protocol ScoreUpdater {

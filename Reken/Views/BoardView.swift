@@ -12,19 +12,18 @@ class BoardView: UIView, EventSubscriber, GameUpdater {
 
     lazy var cancellables = Set<AnyCancellable>()
 
-    var selectionPublisher: EventPublisher<Point> { selectionSubject.eraseToAnyPublisher() }
-    private lazy var selectionSubject = EventSubject<Point>()
+    var selectionPublisher: EventPublisher<Board.Position> {
+        selectionSubject.eraseToAnyPublisher()
+    }
+    private lazy var selectionSubject = EventSubject<Board.Position>()
 
-    var confirmPublisher: EventPublisher<Point> { confirmSubject.eraseToAnyPublisher() }
-    private lazy var confirmSubject = EventSubject<Point>()
+    var confirmPublisher: EventPublisher<Board.Position> { confirmSubject.eraseToAnyPublisher() }
+    private lazy var confirmSubject = EventSubject<Board.Position>()
 
-    private var size: Int!
-    private var selectedLocation: Point?
-    private lazy var cells = [[CellView]]()
-    private lazy var pieces: [[UIView]] = Array(
-        repeating: Array(repeating: UIView(), count: Board.gridSize),
-        count: Board.gridSize
-    )
+    private var selectedPosition: Board.Position?
+    private lazy var cells = [Board.Position: CellView]()
+    private lazy var pieces = [Board.Position: PieceView]()
+
     private lazy var confirmView: ConfirmView = {
         let confirmView = ConfirmView()
         superview?.addSubview(confirmView)
@@ -32,27 +31,42 @@ class BoardView: UIView, EventSubscriber, GameUpdater {
         return confirmView
     }()
 
-    convenience init(size: Int) {
-        self.init()
-        self.size = size
+    override func didMoveToSuperview() {
         makeCells()
     }
 
+    private func makeCells() {
+        guard cells.isEmpty else { return }
+        var previousCell: CellView?
+        Board.allPositions.forEach { position in
+            previousCell = makeCell(at: position, with: previousCell)
+        }
+    }
+
+    private func makeCell(at position: Board.Position, with previousCell: CellView?) -> CellView {
+        let cell = CellView()
+        cells[position] = cell
+        addSubview(cell)
+        makeConstraints(for: cell, at: position, with: previousCell)
+        subscribe(to: cell.tapPublisher) { [weak self] in self?.handleTap(at: position) }
+        return cell
+    }
+
     func addUpdater(_ updater: BoardUpdater) {
-        subscribe(to: updater.showConfirmPublisher) { [weak self] location in
-            self?.showConfirm(at: location)
+        subscribe(to: updater.showConfirmPublisher) { [weak self] position in
+            self?.showConfirm(at: position)
         }
         subscribe(to: updater.moveResultPublisher) { [weak self] moveResult in
             self?.update(with: moveResult)
         }
     }
 
-    private func showConfirm(at location: Point) {
-        guard let cell = cells[location] else { return }
+    private func showConfirm(at position: Board.Position) {
+        guard let cell = cells[position] else { return }
         cell.setSelected(true)
-        if let currentLocation = selectedLocation { cells[currentLocation]?.setSelected(false) }
-        selectedLocation = location
-        confirmView.show(for: cell, isAlignedLeft: location.x < self.size / 2)
+        if let currentPosition = selectedPosition { cells[currentPosition]?.setSelected(false) }
+        selectedPosition = position
+        confirmView.show(for: cell, isAlignedLeft: position.x < Board.size / 2)
     }
 
     private func update(with moveResult: MoveResult) {
@@ -66,28 +80,26 @@ class BoardView: UIView, EventSubscriber, GameUpdater {
     }
 
     private func handleConfirmAction(_ action: ConfirmView.Action) {
-        guard let location = selectedLocation else { return }
-        cells[location]?.setSelected(false)
-        selectedLocation = nil
-        if action == .confirm { confirmSubject.send(location) }
+        guard let position = selectedPosition else { return }
+        cells[position]?.setSelected(false)
+        selectedPosition = nil
+        if action == .confirm { confirmSubject.send(position) }
     }
 
     private func addAnchor(_ anchor: Anchor) {
-        guard let cell = cells[anchor.location] else { return }
+        guard let cell = cells[anchor.position] else { return }
         let pieceView = PieceView(anchor: anchor, cellSize: cell.frame.width)
-        pieces[anchor.location.x][anchor.location.y] = pieceView
+        pieces[anchor.position] = pieceView
         addSubview(pieceView)
-        pieceView.snp.makeConstraints { make in
-            make.center.equalTo(cell)
-        }
+        pieceView.snp.makeConstraints { $0.center.equalTo(cell) }
         layoutIfNeeded()
         updateStems(for: anchor)
     }
 
     private func updateStems(for anchor: Anchor) {
-        guard let pieceView = pieces[anchor.location] as? PieceView else { return }
+        guard let pieceView = pieces[anchor.position] else { return }
         anchor.stems.forEach { stem in
-            guard let stemCell = cells[stem.location],
+            guard let stemCell = cells[stem.position],
                   let stemView = pieceView.stems.first(where: { $0.direction == stem.direction })
             else {
                 return
@@ -101,55 +113,34 @@ class BoardView: UIView, EventSubscriber, GameUpdater {
     }
 
     private func resetStems(for anchor: Anchor) {
-        guard let pieceView = pieces[anchor.location] as? PieceView else { return }
+        guard let pieceView = pieces[anchor.position] else { return }
         pieceView.resetStems()
         pieceView.updateView(with: anchor)
     }
 
-    private func makeCells() {
-
-        var prevCell: CellView?
-
-        for x in 0 ..< size {
-            cells.append([])
-
-            for y in 0 ..< size {
-                let cell = CellView()
-                addSubview(cell)
-                cells[x].append(cell)
-                setUpPublisher(cell: cell, location: (x, y))
-                makeConstraints(for: cell, y: y, prevCell: prevCell)
-                prevCell = cell
-            }
-        }
+    private func handleTap(at position: Board.Position) {
+        selectionSubject.send(position)
     }
 
-    private func setUpPublisher(cell: CellView, location: Point) {
-        cell.tapPublisher.sink { [weak self] in
-            self?.handleTap(cell: cell, location: location)
-        }.store(in: &cancellables)
-    }
-
-    private func handleTap(cell: CellView, location: Point) {
-        selectionSubject.send(location)
-    }
-
-    private func makeConstraints(for cell: CellView, y: Int, prevCell: CellView?) {
-
+    private func makeConstraints(
+        for cell: CellView,
+        at position: Board.Position,
+        with previousCell: CellView?
+    ) {
         cell.snp.makeConstraints { make in
-            if let prevCell = prevCell {
-                if y == 0 {
-                    make.left.equalTo(prevCell.snp.right)
+            if let previousCell = previousCell {
+                if position.y == 0 {
                     make.top.equalToSuperview()
+                    make.left.equalTo(previousCell.snp.right)
                 } else {
-                    make.left.equalTo(prevCell)
-                    make.top.equalTo(prevCell.snp.bottom)
+                    make.top.equalTo(previousCell.snp.bottom)
+                    make.left.equalTo(previousCell)
                 }
             } else {
-                make.left.top.equalToSuperview()
+                make.top.left.equalToSuperview()
             }
 
-            make.width.equalToSuperview().dividedBy(size)
+            make.width.equalToSuperview().dividedBy(Board.size)
             make.height.equalTo(cell.snp.width)
         }
     }

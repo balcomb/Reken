@@ -21,24 +21,26 @@ class GameLogic: BoardUpdater, ScoreUpdater, EventSubscriber {
     var moveResultPublisher: EventPublisher<MoveResult> { moveResultSubject.eraseToAnyPublisher() }
     private lazy var moveResultSubject = EventSubject<MoveResult>()
 
-    var showConfirmPublisher: EventPublisher<Point> { showConfirmSubject.eraseToAnyPublisher() }
-    private lazy var showConfirmSubject = EventSubject<Point>()
+    var showConfirmPublisher: EventPublisher<Board.Position> {
+        showConfirmSubject.eraseToAnyPublisher()
+    }
+    private lazy var showConfirmSubject = EventSubject<Board.Position>()
 
     var gameStatePublisher: EventPublisher<State> { gameStateSubject.eraseToAnyPublisher() }
     private lazy var gameStateSubject = EventSubject<State>()
 
     func addUpdater(_ updater: GameUpdater) {
-        subscribe(to: updater.selectionPublisher) { [weak self] location in
-            self?.handleSelection(at: location)
+        subscribe(to: updater.selectionPublisher) { [weak self] position in
+            self?.handleSelection(at: position)
         }
-        subscribe(to: updater.confirmPublisher) { [weak self] location in
-            self?.handleMove(at: location)
+        subscribe(to: updater.confirmPublisher) { [weak self] position in
+            self?.handleMove(at: position)
         }
     }
 
-    private func handleMove(at location: Point, isAutoMove: Bool = false) {
+    private func handleMove(at position: Board.Position, isAutoMove: Bool = false) {
         guard (state.activePlayer == .blue || isAutoMove),
-              let result = board.addAnchor(at: location, player: state.activePlayer)
+              let result = board.addAnchor(at: position, player: state.activePlayer)
         else {
             return
         }
@@ -50,15 +52,15 @@ class GameLogic: BoardUpdater, ScoreUpdater, EventSubscriber {
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { self.autoMove() }
     }
 
-    private func handleSelection(at location: Point) {
-        guard state.activePlayer == .blue && board.nodeIsEmpty(at: location) else { return }
-        showConfirmSubject.send(location)
+    private func handleSelection(at position: Board.Position) {
+        guard state.activePlayer == .blue && board.isOpen(at: position) else { return }
+        showConfirmSubject.send(position)
     }
 
     private func autoMove() {
         let automaton = Automaton(player: state.activePlayer, board: board)
-        guard let location = automaton.findMove() else { return }
-        self.handleMove(at: location, isAutoMove: true)
+        guard let position = automaton.findMove() else { return }
+        self.handleMove(at: position, isAutoMove: true)
     }
 }
 

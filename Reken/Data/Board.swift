@@ -9,103 +9,101 @@ import Foundation
 
 struct Board {
 
-    static var gridSize: Int { 12 }
+    static var size: Int { 12 }
+    private static let baseIndex = 0
 
-    private var nodes = Array(
-        repeating: Array(repeating: Node(), count: Self.gridSize),
-        count: Self.gridSize
-    )
+    static let allPositions: [Position] = {
+        let indexValues = Array(baseIndex ..< size)
+        return Array(
+            indexValues.map { x in
+                indexValues.map { y in
+                    Position(x: x, y: y)
+                }
+            }.joined()
+        )
+    }()
 
-    var emptyLocations: [Point] {
-        var emptyLocations = [Point]()
-        for (x, column) in nodes.enumerated() {
-            for (y, node) in column.enumerated() {
-                if node.piece == nil { emptyLocations.append((x, y)) }
-            }
-        }
-        return emptyLocations
-    }
+    private var pieces = [Position: Piece]()
+    var openPositions: [Position] { Self.allPositions.filter { pieces[$0] == nil } }
 
     var score: Score {
-        var score: Score = (0, 0)
-        let anchors = nodes.joined().compactMap { $0.piece as? Anchor }
-        anchors.forEach {
-            switch $0.player {
-            case .blue: score.blue += $0.score
-            case .orange: score.orange += $0.score
+        pieces.values.compactMap {
+            $0 as? Anchor
+        }.reduce(into: Score(0, 0)) { score, anchor in
+            switch anchor.player {
+            case .blue: score.blue += anchor.score
+            case .orange: score.orange += anchor.score
             }
         }
-        return score
     }
 
-    func getNode(at location: Point) -> Node? {
-        nodes[location]
+    func getPiece(at position: Position) -> Piece? {
+        pieces[position]
     }
 
-    private func getAnchor(at location: Point) -> Anchor? {
-        nodes[location]?.piece as? Anchor
+    func getAnchor(at position: Position) -> Anchor? {
+        pieces[position] as? Anchor
     }
 
-    mutating func addAnchor(at location: Point, player: GameLogic.Player) -> MoveResult? {
-        guard nodeIsEmpty(at: location) else { return nil }
-        var newAnchor = Anchor(location: location, player: player)
+    mutating func addAnchor(at position: Position, player: GameLogic.Player) -> MoveResult? {
+        guard isOpen(at: position) else { return nil }
+        var newAnchor = Anchor(position: position, player: player)
         var result: MoveResult = (newAnchor, [], [])
         Anchor.Diagonal.allCases.forEach {
-            guard var captureCandidate = getAnchor(at: newAnchor.getLocation(for: $0)),
-                  var pieceToUpdate = getAnchor(at: captureCandidate.getLocation(for: $0)),
+            guard var captureCandidate = getAnchor(at: newAnchor.getPosition(for: $0)),
+                  var pieceToUpdate = getAnchor(at: captureCandidate.getPosition(for: $0)),
                   captureCandidate.player == player.opponent,
                   pieceToUpdate.player == player
             else {
                 return
             }
-            captureCandidate.stems.forEach { removePiece(at: $0.location) }
+            captureCandidate.stems.forEach { pieces[$0.position] = nil }
             captureCandidate.stems = []
             captureCandidate.player = player
-            updateNode(with: captureCandidate)
+            updateBoard(with: captureCandidate)
             pieceToUpdate = updateStems(for: pieceToUpdate)
-            updateNode(with: pieceToUpdate)
+            updateBoard(with: pieceToUpdate)
             result.updatedAnchors.append(pieceToUpdate)
             result.capturedAnchors.append(captureCandidate)
         }
         newAnchor = updateStems(for: newAnchor)
         result.newPiece = newAnchor
-        updateNode(with: newAnchor)
+        updateBoard(with: newAnchor)
         return result
-    }
-
-    private mutating func removePiece(at location: Point) {
-        guard var node = nodes[location] else { return }
-        node.piece = nil
-        nodes[location.x][location.y] = node
     }
 
     private mutating func updateStems(for anchor: Anchor) -> Anchor {
         var anchor = anchor
         Stem.Direction.allCases.forEach {
             let stem = Stem(anchor: anchor, direction: $0)
-            if nodeIsEmpty(at: stem.location) {
-                updateNode(with: stem)
-                anchor.stems.append(stem)
-            }
+            guard isOpen(at: stem.position) else { return }
+            updateBoard(with: stem)
+            anchor.stems.append(stem)
         }
         return anchor
     }
 
-    func nodeIsEmpty(at location: Point) -> Bool {
-        guard let node = nodes[location] else { return false }
-        return node.piece == nil
+    func isOpen(at position: Position) -> Bool {
+        guard position.isValid else { return false }
+        return pieces[position] == nil
     }
 
-    private mutating func updateNode(with piece: Piece) {
-        guard var node = nodes[piece.location] else { return }
-        node.piece = piece
-        nodes[piece.location.x][piece.location.y] = node
+    private mutating func updateBoard(with piece: Piece) {
+        pieces[piece.position] = piece
     }
 }
 
 extension Board {
 
-    struct Node {
-        var piece: Piece?
+    struct Position: Hashable {
+        var x: Int
+        var y: Int
+
+        var isValid: Bool {
+            let isValid: (Int) -> Bool = { $0 >= Board.baseIndex && $0 < Board.size }
+            return isValid(x) && isValid(y)
+        }
+
+        var selfIfValid: Position? { isValid ? self : nil }
     }
 }

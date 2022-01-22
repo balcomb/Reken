@@ -12,7 +12,7 @@ class GameViewController: UIViewController {
 
     private lazy var gameLogic = GameLogic()
     private lazy var scoreView = ScoreView(state: .initial)
-    private lazy var boardView = BoardView(size: Board.gridSize)
+    private lazy var boardView = BoardView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
