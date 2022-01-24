@@ -9,7 +9,7 @@ import UIKit
 
 class PieceView: UIView {
 
-    lazy var stems = [StemView]()
+    lazy var stems = [Stem.Direction: StemView]()
     private var size: CGFloat = 0
 
     private lazy var anchorView: UIView = {
@@ -61,29 +61,29 @@ class PieceView: UIView {
     private func addStems(size: CGFloat) {
         Stem.Direction.allCases.forEach {
             let stemView = StemView(direction: $0, size: size)
-            stems.append(stemView)
+            stems[$0] = stemView
             insertSubview(stemView, belowSubview: anchorContainer)
             stemView.makeConstraints(positionView: anchorContainer)
-            stemView.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
+            stemView.snp.makeConstraints { $0.edges.equalToSuperview() }
         }
     }
 
     func resetStems() {
-        stems.forEach {
-            $0.makeConstraints(positionView: self)
-        }
+        stems.values.forEach { $0.makeConstraints(positionView: self) }
     }
+}
+
+extension PieceView {
 
     class StemView: UIView {
-        var direction: Stem.Direction!
         private var size: CGFloat = 0
 
         private lazy var tab: UIView = {
             let tab = UIView()
             tab.backgroundColor = .gray
             tab.layer.cornerRadius = size / 2
+            tab.layer.borderColor = UIColor.gameBackground.cgColor
+            tab.layer.borderWidth = 0.5
             return tab
         }()
 
@@ -95,11 +95,13 @@ class PieceView: UIView {
 
         convenience init(direction: Stem.Direction, size: CGFloat) {
             self.init()
-            self.direction = direction
             self.size = size
             addSubview(connector)
             addSubview(tab)
+            makeConnectorConstraints(with: direction)
+        }
 
+        private func makeConnectorConstraints(with direction: Stem.Direction) {
             let inset: CGFloat = size * 0.15
             connector.snp.makeConstraints { make in
                 switch direction {

@@ -8,18 +8,20 @@
 import UIKit
 import Combine
 
-class BoardView: UIView, EventSubscriber, GameUpdater {
-
-    lazy var cancellables = Set<AnyCancellable>()
-
+extension BoardView: GameUpdater {
     var selectionPublisher: EventPublisher<Board.Position> {
         selectionSubject.eraseToAnyPublisher()
     }
+    var confirmPublisher: EventPublisher<Board.Position> {
+        confirmSubject.eraseToAnyPublisher()
+    }
+}
+
+class BoardView: UIView, EventSubscriber {
+
+    lazy var cancellables = Set<AnyCancellable>()
     private lazy var selectionSubject = EventSubject<Board.Position>()
-
-    var confirmPublisher: EventPublisher<Board.Position> { confirmSubject.eraseToAnyPublisher() }
     private lazy var confirmSubject = EventSubject<Board.Position>()
-
     private var selectedPosition: Board.Position?
     private lazy var cells = [Board.Position: CellView]()
     private lazy var pieces = [Board.Position: PieceView]()
@@ -70,11 +72,11 @@ class BoardView: UIView, EventSubscriber, GameUpdater {
     }
 
     private func update(with moveResult: MoveResult) {
-        addAnchor(moveResult.newPiece)
-        moveResult.capturedAnchors.forEach {
+        addAnchor(moveResult.newAnchor)
+        moveResult.updatedAnchors.capturedAnchors.forEach {
             resetStems(for: $0)
         }
-        moveResult.updatedAnchors.forEach {
+        moveResult.updatedAnchors.capturingAnchors.forEach {
             updateStems(for: $0)
         }
     }
@@ -100,13 +102,13 @@ class BoardView: UIView, EventSubscriber, GameUpdater {
         guard let pieceView = pieces[anchor.position] else { return }
         anchor.stems.forEach { stem in
             guard let stemCell = cells[stem.position],
-                  let stemView = pieceView.stems.first(where: { $0.direction == stem.direction })
+                  let stemView = pieceView.stems[stem.direction]
             else {
                 return
             }
             stemView.makeConstraints(positionView: stemCell)
         }
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.4) {
             self.layoutIfNeeded()
             pieceView.updateView(with: anchor)
         }

@@ -8,25 +8,32 @@
 import Foundation
 import Combine
 
-typealias MoveResult = (newPiece: Anchor, updatedAnchors: [Anchor], capturedAnchors: [Anchor])
+typealias MoveResult = (newAnchor: Anchor, updatedAnchors: UpdatedAnchors)
+typealias UpdatedAnchors = (capturingAnchors: [Anchor], capturedAnchors: [Anchor])
 typealias Score = (blue: Int, orange: Int)
 
-class GameLogic: BoardUpdater, ScoreUpdater, EventSubscriber {
-
-    lazy var cancellables = Set<AnyCancellable>()
-
-    private lazy var board = Board()
-    private var state = State.initial
-
-    var moveResultPublisher: EventPublisher<MoveResult> { moveResultSubject.eraseToAnyPublisher() }
-    private lazy var moveResultSubject = EventSubject<MoveResult>()
-
+extension GameLogic: BoardUpdater {
+    var moveResultPublisher: EventPublisher<MoveResult> {
+        moveResultSubject.eraseToAnyPublisher()
+    }
     var showConfirmPublisher: EventPublisher<Board.Position> {
         showConfirmSubject.eraseToAnyPublisher()
     }
-    private lazy var showConfirmSubject = EventSubject<Board.Position>()
+}
 
-    var gameStatePublisher: EventPublisher<State> { gameStateSubject.eraseToAnyPublisher() }
+extension GameLogic: ScoreUpdater {
+    var gameStatePublisher: EventPublisher<State> {
+        gameStateSubject.eraseToAnyPublisher()
+    }
+}
+
+class GameLogic: EventSubscriber {
+
+    lazy var cancellables = Set<AnyCancellable>()
+    private lazy var board = Board()
+    private var state = State.initial
+    private lazy var moveResultSubject = EventSubject<MoveResult>()
+    private lazy var showConfirmSubject = EventSubject<Board.Position>()
     private lazy var gameStateSubject = EventSubject<State>()
 
     func addUpdater(_ updater: GameUpdater) {
@@ -48,7 +55,7 @@ class GameLogic: BoardUpdater, ScoreUpdater, EventSubscriber {
         state.score = board.score
         moveResultSubject.send(result)
         gameStateSubject.send(state)
-        guard result.newPiece.player == .blue else { return }
+        guard result.newAnchor.player == .blue else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { self.autoMove() }
     }
 

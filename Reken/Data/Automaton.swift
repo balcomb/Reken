@@ -7,6 +7,8 @@
 
 import Foundation
 
+typealias MoveCandidate = (position: Board.Position, scoreDiff: Int)
+
 struct Automaton {
 
     private let player: GameLogic.Player
@@ -18,17 +20,7 @@ struct Automaton {
     }
 
     func findMove() -> Board.Position? {
-        var candidates = [(position: Board.Position, scoreDiff: Int)]()
-        board.openPositions.forEach {
-            var boardCopy = board
-            guard let _ = boardCopy.addAnchor(at: $0, player: player) else { return }
-            let scoreDiff: Int
-            switch player {
-            case .blue: scoreDiff = boardCopy.score.blue - boardCopy.score.orange
-            case .orange: scoreDiff = boardCopy.score.orange - boardCopy.score.blue
-            }
-            candidates.append(($0, scoreDiff))
-        }
+        var candidates = getMoveCandidates()
         guard !candidates.isEmpty else { return nil }
         let nonCapturableCandidates = candidates.filter {
             !couldCapture(at: $0.position)
@@ -38,6 +30,26 @@ struct Automaton {
         guard let maxScoreDiff = candidates.first?.scoreDiff else { return nil }
         candidates = candidates.filter { $0.scoreDiff == maxScoreDiff }
         return candidates.randomElement()?.position
+    }
+
+    private func getMoveCandidates() -> [MoveCandidate] {
+        var candidates = [MoveCandidate]()
+        board.openPositions.forEach { position in
+            guard let candidate = getMoveCandidate(at: position, on: board) else { return }
+            candidates.append(candidate)
+        }
+        return candidates
+    }
+
+    private func getMoveCandidate(at position: Board.Position, on board: Board) -> MoveCandidate? {
+        var boardCopy = board
+        guard let _ = boardCopy.addAnchor(at: position, player: player) else { return nil }
+        let scoreDiff: Int
+        switch player {
+        case .blue: scoreDiff = boardCopy.score.blue - boardCopy.score.orange
+        case .orange: scoreDiff = boardCopy.score.orange - boardCopy.score.blue
+        }
+        return (position, scoreDiff)
     }
 
     private func couldCapture(at position: Board.Position) -> Bool {

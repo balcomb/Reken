@@ -48,44 +48,56 @@ struct Board {
     mutating func addAnchor(at position: Position, player: GameLogic.Player) -> MoveResult? {
         guard isOpen(at: position) else { return nil }
         var newAnchor = Anchor(position: position, player: player)
-        var result: MoveResult = (newAnchor, [], [])
-        Anchor.Diagonal.allCases.forEach {
-            guard var captureCandidate = getAnchor(at: newAnchor.getPosition(for: $0)),
-                  var pieceToUpdate = getAnchor(at: captureCandidate.getPosition(for: $0)),
-                  captureCandidate.player == player.opponent,
-                  pieceToUpdate.player == player
-            else {
-                return
-            }
-            captureCandidate.stems.forEach { pieces[$0.position] = nil }
-            captureCandidate.stems = []
-            captureCandidate.player = player
-            updateBoard(with: captureCandidate)
-            pieceToUpdate = updateStems(for: pieceToUpdate)
-            updateBoard(with: pieceToUpdate)
-            result.updatedAnchors.append(pieceToUpdate)
-            result.capturedAnchors.append(captureCandidate)
-        }
-        newAnchor = updateStems(for: newAnchor)
-        result.newPiece = newAnchor
-        updateBoard(with: newAnchor)
-        return result
+        let updatedAnchors = getUpdatedAnchors(for: newAnchor)
+        configureAnchor(&newAnchor)
+        return MoveResult(newAnchor, updatedAnchors)
     }
 
-    private mutating func updateStems(for anchor: Anchor) -> Anchor {
-        var anchor = anchor
+    private mutating func getUpdatedAnchors(for anchor: Anchor) -> UpdatedAnchors {
+        var updatedAnchors = UpdatedAnchors([], [])
+        Anchor.Diagonal.allCases.forEach { diagonal in
+            guard let capturePair = getCapturePair(for: anchor, with: diagonal) else { return }
+            updatedAnchors.capturingAnchors.append(capturePair.capturingAnchor)
+            updatedAnchors.capturedAnchors.append(capturePair.capturedAnchor)
+        }
+        return updatedAnchors
+    }
+
+    private mutating func getCapturePair(
+        for anchor: Anchor,
+        with diagonal: Anchor.Diagonal
+    ) -> (capturedAnchor: Anchor, capturingAnchor: Anchor)? {
+        guard var capturedAnchor = getAnchor(at: anchor.getPosition(for: diagonal)),
+              capturedAnchor.player == anchor.player.opponent,
+              var capturingAnchor = getAnchor(at: capturedAnchor.getPosition(for: diagonal)),
+              capturingAnchor.player == anchor.player
+        else {
+            return nil
+        }
+        updateCapturedAnchor(&capturedAnchor)
+        configureAnchor(&capturingAnchor)
+        return (capturedAnchor, capturingAnchor)
+    }
+
+    private mutating func updateCapturedAnchor(_ anchor: inout Anchor) {
+        anchor.stems.forEach { pieces[$0.position] = nil }
+        anchor.stems = []
+        anchor.player = anchor.player.opponent
+        updateBoard(with: anchor)
+    }
+
+    private mutating func configureAnchor(_ anchor: inout Anchor) {
         Stem.Direction.allCases.forEach {
             let stem = Stem(anchor: anchor, direction: $0)
             guard isOpen(at: stem.position) else { return }
             updateBoard(with: stem)
             anchor.stems.append(stem)
         }
-        return anchor
+        updateBoard(with: anchor)
     }
 
     func isOpen(at position: Position) -> Bool {
-        guard position.isValid else { return false }
-        return pieces[position] == nil
+        position.isValid && pieces[position] == nil
     }
 
     private mutating func updateBoard(with piece: Piece) {
