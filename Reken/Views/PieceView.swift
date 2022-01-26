@@ -21,9 +21,12 @@ class PieceView: UIView {
 
     private lazy var anchorContainer: UIView = {
         let anchorContainer = UIView()
-        anchorContainer.layer.masksToBounds = true
         anchorContainer.backgroundColor = .white
         anchorContainer.layer.cornerRadius = size / 2
+        anchorContainer.layer.shadowColor = UIColor.gameBackground.cgColor
+        anchorContainer.layer.shadowRadius = 3
+        anchorContainer.layer.shadowOpacity = 0.5
+        anchorContainer.layer.shadowOffset = CGSize(width: 0, height: 0)
         return anchorContainer
     }()
 
@@ -40,9 +43,7 @@ class PieceView: UIView {
             make.width.height.equalTo(size)
             make.center.equalToSuperview()
         }
-        anchorView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        anchorView.snp.makeConstraints { $0.edges.equalToSuperview() }
         addStems(size: size * 0.6)
     }
 
