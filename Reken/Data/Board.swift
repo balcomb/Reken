@@ -37,6 +37,14 @@ struct Board {
         }
     }
 
+    func scoreDiff(for player: GameLogic.Player) -> Int {
+        let score = score
+        switch player {
+        case .blue: return score.blue - score.orange
+        case .orange: return score.orange - score.blue
+        }
+    }
+
     func getPiece(at position: Position) -> Piece? {
         pieces[position]
     }
