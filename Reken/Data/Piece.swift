@@ -11,11 +11,7 @@ protocol Piece {
     var position: Board.Position { get }
 }
 
-struct Anchor: Piece {
-    let position: Board.Position
-    var player: GameLogic.Player
-    var stems: [Stem] = []
-    var score: Int { Stem.Direction.allCases.count - stems.count }
+extension Piece {
 
     func getPosition(for diagonal: Diagonal) -> Board.Position {
         let shift: (x: Int, y: Int)
@@ -27,10 +23,13 @@ struct Anchor: Piece {
         }
         return Board.Position(x: position.x + shift.x, y: position.y + shift.y)
     }
+}
 
-    enum Diagonal: CaseIterable {
-        case northwest, northeast, southeast, southwest
-    }
+struct Anchor: Piece {
+    let position: Board.Position
+    var player: GameLogic.Player
+    var stems: [Stem] = []
+    var score: Int { Stem.Direction.allCases.count - stems.count }
 }
 
 struct Stem: Piece {
@@ -51,4 +50,8 @@ struct Stem: Piece {
     enum Direction: CaseIterable {
         case north, south, east, west
     }
+}
+
+enum Diagonal: CaseIterable {
+    case northwest, northeast, southeast, southwest
 }

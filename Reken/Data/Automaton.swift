@@ -80,7 +80,7 @@ struct Automaton {
     ) -> [Board.Position] {
         anchorBoardPairs.compactMap { pair in
             var isRecapturable = false
-            for diagonal in Anchor.Diagonal.allCases {
+            for diagonal in Diagonal.allCases {
                 let diagonalPosition = pair.anchor.getPosition(for: diagonal)
                 guard let currentDiagonalAnchor = board.getAnchor(at: diagonalPosition),
                       let updatedDiagonalAnchor = pair.boardCopy.getAnchor(at: diagonalPosition),
@@ -106,7 +106,7 @@ struct Automaton {
 
     private func anchorCouldBeCaptured(at position: Board.Position, on board: Board) -> Bool {
         let anchorCandidate = Anchor(position: position, player: player)
-        let diagonals: [[Anchor.Diagonal]] = [[.northwest, .southeast], [.northeast, .southwest]]
+        let diagonals: [[Diagonal]] = [[.northwest, .southeast], [.northeast, .southwest]]
         for pair in diagonals {
             let capturePositions = pair.compactMap { diagonal in
                 anchorCandidate.getPosition(for: diagonal).selfIfValid
@@ -125,7 +125,7 @@ struct Automaton {
     }
 
     private func anchorWouldCapture(_ anchorCandidate: Anchor, anchor: Anchor) -> Bool {
-        guard let diagonal = Anchor.Diagonal.allCases.first(
+        guard let diagonal = Diagonal.allCases.first(
             where: { anchorCandidate.getPosition(for: $0) == anchor.position }
         ) else {
             return false
@@ -137,15 +137,22 @@ struct Automaton {
     }
 
     private func prioritizeCaptureBlockingMoves(for candidates: inout [MoveCandidate]) {
-        var anchorDiagonalPairs = [(anchor: Anchor, diagonal: Anchor.Diagonal)]()
+        var anchorDiagonalPairs = [(anchor: Anchor, diagonal: Diagonal)]()
         var captureBlockingMoves = candidates.filter { candidate in
             var wouldBlock = false
-            let anchorCandidate = Anchor(position: candidate.position, player: player)
-            for diagonal in Anchor.Diagonal.allCases {
-                if let anchor1 = board.getAnchor(at: anchorCandidate.getPosition(for: diagonal)),
-                   anchor1.player == player,
-                   let anchor2 = board.getAnchor(at: anchor1.getPosition(for: diagonal)),
-                   anchor2.player == player.opponent {
+            var boardCopy = board
+            let moveResult = boardCopy.addAnchor(at: candidate.position, player: player)
+            guard let anchorCandidate = moveResult?.newAnchor else { return false }
+            let pieces: [Piece] = [anchorCandidate] + anchorCandidate.stems
+            pieces.forEach { piece in
+                for diagonal in Diagonal.allCases {
+                    guard let anchor1 = board.getAnchor(at: piece.getPosition(for: diagonal)),
+                          anchor1.player == player,
+                          let anchor2 = board.getAnchor(at: anchor1.getPosition(for: diagonal)),
+                          anchor2.player == player.opponent
+                    else {
+                        continue
+                    }
                     anchorDiagonalPairs.append((anchor2, diagonal))
                     wouldBlock = true
                     break

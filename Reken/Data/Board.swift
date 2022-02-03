@@ -63,7 +63,7 @@ struct Board {
 
     private mutating func getUpdatedAnchors(for anchor: Anchor) -> UpdatedAnchors {
         var updatedAnchors = UpdatedAnchors([], [])
-        Anchor.Diagonal.allCases.forEach { diagonal in
+        Diagonal.allCases.forEach { diagonal in
             guard let capturePair = getCapturePair(for: anchor, with: diagonal) else { return }
             updatedAnchors.capturingAnchors.append(capturePair.capturingAnchor)
             updatedAnchors.capturedAnchors.append(capturePair.capturedAnchor)
@@ -73,7 +73,7 @@ struct Board {
 
     private mutating func getCapturePair(
         for anchor: Anchor,
-        with diagonal: Anchor.Diagonal
+        with diagonal: Diagonal
     ) -> (capturedAnchor: Anchor, capturingAnchor: Anchor)? {
         guard var capturedAnchor = getAnchor(at: anchor.getPosition(for: diagonal)),
               capturedAnchor.player == anchor.player.opponent,
