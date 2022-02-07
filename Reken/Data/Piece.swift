@@ -27,7 +27,7 @@ extension Piece {
 
 struct Anchor: Piece {
     let position: Board.Position
-    var player: GameLogic.Player
+    var player: Game.Player
     var stems: [Stem] = []
     var score: Int { Stem.Direction.allCases.count - stems.count }
 }

@@ -12,10 +12,10 @@ typealias AnchorBoardPair = (anchor: Anchor, boardCopy: Board)
 
 struct Automaton {
 
-    private let player: GameLogic.Player
+    private let player: Game.Player
     private var board: Board
 
-    init(player: GameLogic.Player, board: Board) {
+    init(player: Game.Player, board: Board) {
         self.player = player
         self.board = board
     }

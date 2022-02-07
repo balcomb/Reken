@@ -11,22 +11,20 @@ import SnapKit
 class GameViewController: UIViewController {
 
     private lazy var gameLogic = GameLogic()
-    private lazy var scoreView = ScoreView(state: .initial)
-    private lazy var boardView = BoardView()
+    private lazy var scoreView = ScoreView(dataSource: gameLogic)
+    private lazy var boardView = BoardView(dataSource: gameLogic)
+    private lazy var controlView = ControlView(dataSource: gameLogic)
+
+    override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .gameBackground
         view.addSubview(boardView)
         view.addSubview(scoreView)
+        view.addSubview(controlView)
         makeConstraints()
-        configureUpdaters()
-    }
-
-    private func configureUpdaters() {
-        gameLogic.addUpdater(boardView)
-        boardView.addUpdater(gameLogic)
-        scoreView.addUpdater(gameLogic)
+        gameLogic.startNewGame()
     }
 
     private func makeConstraints() {
@@ -38,6 +36,11 @@ class GameViewController: UIViewController {
             make.height.equalTo(boardView.snp.width)
             make.center.equalToSuperview()
             make.left.right.equalToSuperview().inset(9)
+        }
+        controlView.snp.makeConstraints { make in
+            make.top.equalTo(boardView.snp.bottom)
+            make.left.right.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
 }

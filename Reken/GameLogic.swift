@@ -8,81 +8,55 @@
 import Foundation
 import Combine
 
-typealias MoveResult = (newAnchor: Anchor, updatedAnchors: UpdatedAnchors)
-typealias UpdatedAnchors = (capturingAnchors: [Anchor], capturedAnchors: [Anchor])
-typealias Score = (blue: Int, orange: Int)
+protocol GameDataSource {
+    var gameUpdatePublisher: EventPublisher<Game> { get }
+    var moveResultPublisher: EventPublisher<MoveResult> { get }
+    func isValidSelection(at position: Board.Position) -> Bool
+    func handleConfirmedSelection(at position: Board.Position)
+    func startNewGame()
+}
 
-extension GameLogic: BoardUpdater {
-    var moveResultPublisher: EventPublisher<MoveResult> {
-        moveResultSubject.eraseToAnyPublisher()
+extension GameLogic: GameDataSource {
+
+    var gameUpdatePublisher: EventPublisher<Game> { gameUpdateSubject.eraseToAnyPublisher() }
+    var moveResultPublisher: EventPublisher<MoveResult> { moveResultSubject.eraseToAnyPublisher() }
+
+    func isValidSelection(at position: Board.Position) -> Bool {
+        game.activePlayer == .blue && game.board.isOpen(at: position)
     }
-    var showConfirmPublisher: EventPublisher<Board.Position> {
-        showConfirmSubject.eraseToAnyPublisher()
+
+    func handleConfirmedSelection(at position: Board.Position) {
+        handleMove(at: position)
+    }
+
+    func startNewGame() {
+        game = Game()
+        gameUpdateSubject.send(game)
     }
 }
 
-extension GameLogic: ScoreUpdater {
-    var gameStatePublisher: EventPublisher<State> {
-        gameStateSubject.eraseToAnyPublisher()
-    }
-}
+class GameLogic {
 
-class GameLogic: EventSubscriber {
-
-    lazy var cancellables = Set<AnyCancellable>()
-    private lazy var board = Board()
-    private var state = State.initial
+    private var game: Game!
     private lazy var moveResultSubject = EventSubject<MoveResult>()
-    private lazy var showConfirmSubject = EventSubject<Board.Position>()
-    private lazy var gameStateSubject = EventSubject<State>()
-
-    func addUpdater(_ updater: GameUpdater) {
-        subscribe(to: updater.selectionPublisher) { [weak self] position in
-            self?.handleSelection(at: position)
-        }
-        subscribe(to: updater.confirmPublisher) { [weak self] position in
-            self?.handleMove(at: position)
-        }
-    }
+    private lazy var gameUpdateSubject = EventSubject<Game>()
 
     private func handleMove(at position: Board.Position, isAutoMove: Bool = false) {
-        guard (state.activePlayer == .blue || isAutoMove),
-              let result = board.addAnchor(at: position, player: state.activePlayer)
+        guard (game.activePlayer == .blue || isAutoMove),
+              let result = game.board.addAnchor(at: position, player: game.activePlayer)
         else {
             return
         }
-        state.activePlayer = state.activePlayer.opponent
-        state.score = board.score
+        game.activePlayer = game.activePlayer.opponent
         moveResultSubject.send(result)
-        gameStateSubject.send(state)
+        gameUpdateSubject.send(game)
         guard result.newAnchor.player == .blue else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { self.autoMove() }
     }
 
-    private func handleSelection(at position: Board.Position) {
-        guard state.activePlayer == .blue && board.isOpen(at: position) else { return }
-        showConfirmSubject.send(position)
-    }
-
     private func autoMove() {
-        let automaton = Automaton(player: state.activePlayer, board: board)
+        let automaton = Automaton(player: game.activePlayer, board: game.board)
         guard let position = automaton.findMove() else { return }
-        self.handleMove(at: position, isAutoMove: true)
-    }
-}
-
-extension GameLogic {
-
-    enum Player: CaseIterable {
-        case blue, orange
-
-        var opponent: Player { Player.allCases.first { $0 != self }! }
-    }
-
-    struct State {
-        var activePlayer: GameLogic.Player
-        var score: Score
-
-        static var initial: State { State(activePlayer: .blue, score: (0, 0)) }
+        handleMove(at: position, isAutoMove: true)
     }
 }

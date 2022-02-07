@@ -24,6 +24,8 @@ struct Board {
     }()
 
     private var pieces = [Position: Piece]()
+    var isEmpty: Bool { pieces.isEmpty }
+    var isFull: Bool { pieces.keys.count == Self.allPositions.count }
     var openPositions: [Position] { Self.allPositions.filter { pieces[$0] == nil } }
 
     var score: Score {
@@ -37,7 +39,7 @@ struct Board {
         }
     }
 
-    func scoreDiff(for player: GameLogic.Player) -> Int {
+    func scoreDiff(for player: Game.Player) -> Int {
         let score = score
         switch player {
         case .blue: return score.blue - score.orange
@@ -53,7 +55,7 @@ struct Board {
         pieces[position] as? Anchor
     }
 
-    mutating func addAnchor(at position: Position, player: GameLogic.Player) -> MoveResult? {
+    mutating func addAnchor(at position: Position, player: Game.Player) -> MoveResult? {
         guard isOpen(at: position) else { return nil }
         var newAnchor = Anchor(position: position, player: player)
         let updatedAnchors = getUpdatedAnchors(for: newAnchor)

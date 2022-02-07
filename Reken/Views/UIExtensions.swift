@@ -17,7 +17,7 @@ extension UIView {
 
 extension UIColor {
 
-    convenience init(for player: GameLogic.Player) {
+    convenience init(for player: Game.Player) {
         switch player {
         case .blue: self.init(red: 0, green: 0.5, blue: 0.85, alpha: 1)
         case .orange: self.init(red: 0.9, green: 0.5, blue: 0, alpha: 1)

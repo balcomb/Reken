@@ -19,9 +19,11 @@
 		B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FCDBD276EAE6A00F8B39C /* PieceView.swift */; };
 		B58FD28C2795F7C900CF3A78 /* UIExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58FD28B2795F7C900CF3A78 /* UIExtensions.swift */; };
 		B58FD28E2796548700CF3A78 /* ConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58FD28D2796548700CF3A78 /* ConfirmView.swift */; };
-		B58FD290279771E900CF3A78 /* UpdateProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58FD28F279771E900CF3A78 /* UpdateProtocols.swift */; };
+		B58FD290279771E900CF3A78 /* EventSubscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58FD28F279771E900CF3A78 /* EventSubscriber.swift */; };
+		B58FD2CD27ADAC2A00CF3A78 /* ControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58FD2CC27ADAC2900CF3A78 /* ControlView.swift */; };
 		B597BB2C279336A80081D417 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2B279336A80081D417 /* ScoreView.swift */; };
 		B597BB2E279340150081D417 /* Automaton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2D279340150081D417 /* Automaton.swift */; };
+		B5A9D9D127AEEB3D00565DCE /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9D9D027AEEB3D00565DCE /* Game.swift */; };
 		B5ADF68527695A2A0036DA7E /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68427695A2A0036DA7E /* BoardView.swift */; };
 		B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68627695A6D0036DA7E /* CellView.swift */; };
 		B5E12477277FBBAA007222C3 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12476277FBBAA007222C3 /* Board.swift */; };
@@ -44,9 +46,11 @@
 		B57FCDBD276EAE6A00F8B39C /* PieceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceView.swift; sourceTree = "<group>"; };
 		B58FD28B2795F7C900CF3A78 /* UIExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtensions.swift; sourceTree = "<group>"; };
 		B58FD28D2796548700CF3A78 /* ConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmView.swift; sourceTree = "<group>"; };
-		B58FD28F279771E900CF3A78 /* UpdateProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateProtocols.swift; sourceTree = "<group>"; };
+		B58FD28F279771E900CF3A78 /* EventSubscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSubscriber.swift; sourceTree = "<group>"; };
+		B58FD2CC27ADAC2900CF3A78 /* ControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlView.swift; sourceTree = "<group>"; };
 		B597BB2B279336A80081D417 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		B597BB2D279340150081D417 /* Automaton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Automaton.swift; sourceTree = "<group>"; };
+		B5A9D9D027AEEB3D00565DCE /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 		B5ADF68427695A2A0036DA7E /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		B5ADF68627695A6D0036DA7E /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
 		B5E12476277FBBAA007222C3 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
@@ -102,7 +106,6 @@
 				B56064B02752EBB1006BF7DD /* SceneDelegate.swift */,
 				B5E124782780F71A007222C3 /* GameLogic.swift */,
 				B56064B22752EBB1006BF7DD /* GameViewController.swift */,
-				B58FD28F279771E900CF3A78 /* UpdateProtocols.swift */,
 				B5ADF68327695A190036DA7E /* Views */,
 				B56064B42752EBB1006BF7DD /* Main.storyboard */,
 				B56064B72752EBB3006BF7DD /* Assets.xcassets */,
@@ -115,9 +118,11 @@
 		B57FCDBA276EAE2D00F8B39C /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				B57FCDBB276EAE4B00F8B39C /* Piece.swift */,
-				B5E12476277FBBAA007222C3 /* Board.swift */,
 				B597BB2D279340150081D417 /* Automaton.swift */,
+				B5E12476277FBBAA007222C3 /* Board.swift */,
+				B58FD28F279771E900CF3A78 /* EventSubscriber.swift */,
+				B5A9D9D027AEEB3D00565DCE /* Game.swift */,
+				B57FCDBB276EAE4B00F8B39C /* Piece.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -128,6 +133,7 @@
 				B5ADF68427695A2A0036DA7E /* BoardView.swift */,
 				B5ADF68627695A6D0036DA7E /* CellView.swift */,
 				B58FD28D2796548700CF3A78 /* ConfirmView.swift */,
+				B58FD2CC27ADAC2900CF3A78 /* ControlView.swift */,
 				B57FCDBD276EAE6A00F8B39C /* PieceView.swift */,
 				B597BB2B279336A80081D417 /* ScoreView.swift */,
 				B58FD28B2795F7C900CF3A78 /* UIExtensions.swift */,
@@ -245,16 +251,18 @@
 				B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */,
 				B57FCDBE276EAE6A00F8B39C /* PieceView.swift in Sources */,
 				B58FD28C2795F7C900CF3A78 /* UIExtensions.swift in Sources */,
+				B58FD2CD27ADAC2A00CF3A78 /* ControlView.swift in Sources */,
 				B5E124792780F71A007222C3 /* GameLogic.swift in Sources */,
 				B58FD28E2796548700CF3A78 /* ConfirmView.swift in Sources */,
 				B597BB2C279336A80081D417 /* ScoreView.swift in Sources */,
 				B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */,
-				B58FD290279771E900CF3A78 /* UpdateProtocols.swift in Sources */,
+				B58FD290279771E900CF3A78 /* EventSubscriber.swift in Sources */,
 				B597BB2E279340150081D417 /* Automaton.swift in Sources */,
 				B56064AF2752EBB1006BF7DD /* AppDelegate.swift in Sources */,
 				B5ADF68527695A2A0036DA7E /* BoardView.swift in Sources */,
 				B5E12477277FBBAA007222C3 /* Board.swift in Sources */,
 				B56064B12752EBB1006BF7DD /* SceneDelegate.swift in Sources */,
+				B5A9D9D127AEEB3D00565DCE /* Game.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -444,7 +452,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpdsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortaitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

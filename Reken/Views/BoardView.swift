@@ -8,20 +8,10 @@
 import UIKit
 import Combine
 
-extension BoardView: GameUpdater {
-    var selectionPublisher: EventPublisher<Board.Position> {
-        selectionSubject.eraseToAnyPublisher()
-    }
-    var confirmPublisher: EventPublisher<Board.Position> {
-        confirmSubject.eraseToAnyPublisher()
-    }
-}
-
 class BoardView: UIView, EventSubscriber {
 
     lazy var cancellables = Set<AnyCancellable>()
-    private lazy var selectionSubject = EventSubject<Board.Position>()
-    private lazy var confirmSubject = EventSubject<Board.Position>()
+    private var dataSource: GameDataSource!
     private var selectedPosition: Board.Position?
     private lazy var cells = [Board.Position: CellView]()
     private lazy var pieces = [Board.Position: PieceView]()
@@ -33,8 +23,16 @@ class BoardView: UIView, EventSubscriber {
         return confirmView
     }()
 
-    override func didMoveToSuperview() {
+    convenience init(dataSource: GameDataSource) {
+        self.init()
+        self.dataSource = dataSource
         makeCells()
+        subscribe(to: dataSource.moveResultPublisher) { [weak self] moveResult in
+            self?.update(with: moveResult)
+        }
+        subscribe(to: dataSource.gameUpdatePublisher) { [weak self] game in
+            self?.handleUpdate(for: game)
+        }
     }
 
     private func makeCells() {
@@ -54,12 +52,14 @@ class BoardView: UIView, EventSubscriber {
         return cell
     }
 
-    func addUpdater(_ updater: BoardUpdater) {
-        subscribe(to: updater.showConfirmPublisher) { [weak self] position in
-            self?.showConfirm(at: position)
-        }
-        subscribe(to: updater.moveResultPublisher) { [weak self] moveResult in
-            self?.update(with: moveResult)
+    private func handleUpdate(for game: Game) {
+        guard game.progress == .new else { return }
+        isUserInteractionEnabled = false
+        UIView.animate(withDuration: 0.5) {
+            self.pieces.values.forEach { $0.alpha = 0 }
+        } completion: { _ in
+            self.isUserInteractionEnabled = true
+            self.pieces.removeAll()
         }
     }
 
@@ -85,7 +85,8 @@ class BoardView: UIView, EventSubscriber {
         guard let position = selectedPosition else { return }
         cells[position]?.setSelected(false)
         selectedPosition = nil
-        if action == .confirm { confirmSubject.send(position) }
+        guard action == .confirm else { return }
+        dataSource.handleConfirmedSelection(at: position)
     }
 
     private func addAnchor(_ anchor: Anchor) {
@@ -121,7 +122,8 @@ class BoardView: UIView, EventSubscriber {
     }
 
     private func handleTap(at position: Board.Position) {
-        selectionSubject.send(position)
+        guard dataSource.isValidSelection(at: position) else { return }
+        showConfirm(at: position)
     }
 
     private func makeConstraints(
