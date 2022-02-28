@@ -9,7 +9,7 @@ import UIKit
 
 class PieceView: UIView {
 
-    lazy var stems = [Stem.Direction: StemView]()
+    lazy var stems = [Cardinal: StemView]()
     private var size: CGFloat = 0
 
     private lazy var anchorView: UIView = {
@@ -51,7 +51,7 @@ class PieceView: UIView {
         let color = UIColor(for: anchor.player)
         let alpha: CGFloat = {
             if anchor.score == 0 { return 1 }
-            let maxScore = Stem.Direction.allCases.count
+            let maxScore = Cardinal.allCases.count
             if anchor.score == maxScore { return 0 }
             return (CGFloat(maxScore - anchor.score) * 0.2) + 0.05
         }()
@@ -60,7 +60,7 @@ class PieceView: UIView {
     }
 
     private func addStems(size: CGFloat) {
-        Stem.Direction.allCases.forEach {
+        Cardinal.allCases.forEach {
             let stemView = StemView(direction: $0, size: size)
             stems[$0] = stemView
             insertSubview(stemView, belowSubview: anchorContainer)
@@ -94,7 +94,7 @@ extension PieceView {
             return connector
         }()
 
-        convenience init(direction: Stem.Direction, size: CGFloat) {
+        convenience init(direction: Cardinal, size: CGFloat) {
             self.init()
             self.size = size
             addSubview(connector)
@@ -102,7 +102,7 @@ extension PieceView {
             makeConnectorConstraints(with: direction)
         }
 
-        private func makeConnectorConstraints(with direction: Stem.Direction) {
+        private func makeConnectorConstraints(with direction: Cardinal) {
             let inset: CGFloat = size * 0.15
             connector.snp.makeConstraints { make in
                 switch direction {

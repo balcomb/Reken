@@ -65,8 +65,8 @@ struct Board {
 
     private mutating func getUpdatedAnchors(for anchor: Anchor) -> UpdatedAnchors {
         var updatedAnchors = UpdatedAnchors([], [])
-        Diagonal.allCases.forEach { diagonal in
-            guard let capturePair = getCapturePair(for: anchor, with: diagonal) else { return }
+        Ordinal.allCases.forEach { ordinal in
+            guard let capturePair = getCapturePair(for: anchor, with: ordinal) else { return }
             updatedAnchors.capturingAnchors.append(capturePair.capturingAnchor)
             updatedAnchors.capturedAnchors.append(capturePair.capturedAnchor)
         }
@@ -75,11 +75,11 @@ struct Board {
 
     private mutating func getCapturePair(
         for anchor: Anchor,
-        with diagonal: Diagonal
+        with ordinal: Ordinal
     ) -> (capturedAnchor: Anchor, capturingAnchor: Anchor)? {
-        guard var capturedAnchor = getAnchor(at: anchor.getPosition(for: diagonal)),
+        guard var capturedAnchor = getAnchor(at: anchor.getPosition(for: ordinal)),
               capturedAnchor.player == anchor.player.opponent,
-              var capturingAnchor = getAnchor(at: capturedAnchor.getPosition(for: diagonal)),
+              var capturingAnchor = getAnchor(at: capturedAnchor.getPosition(for: ordinal)),
               capturingAnchor.player == anchor.player
         else {
             return nil
@@ -97,7 +97,7 @@ struct Board {
     }
 
     private mutating func configureAnchor(_ anchor: inout Anchor) {
-        Stem.Direction.allCases.forEach {
+        Cardinal.allCases.forEach {
             let stem = Stem(anchor: anchor, direction: $0)
             guard isOpen(at: stem.position) else { return }
             updateBoard(with: stem)
@@ -126,6 +126,17 @@ extension Board {
             return isValid(x) && isValid(y)
         }
 
-        var selfIfValid: Position? { isValid ? self : nil }
+        func getPosition<D: Direction>(for direction: D, distance: Int = 1) -> Board.Position {
+            var convertedDelta = direction.positionDelta
+            convertedDelta.x *= distance
+            convertedDelta.y *= distance
+            return self + convertedDelta
+        }
+
+        static func +(lhs: Position, rhs: Position) -> Position {
+            Position(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+        }
+
+        static var zero: Position { Position(x: 0, y: 0) }
     }
 }

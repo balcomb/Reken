@@ -80,12 +80,12 @@ struct Automaton {
     ) -> [Board.Position] {
         anchorBoardPairs.compactMap { pair in
             var isRecapturable = false
-            for diagonal in Diagonal.allCases {
-                let diagonalPosition = pair.anchor.getPosition(for: diagonal)
-                guard let currentDiagonalAnchor = board.getAnchor(at: diagonalPosition),
-                      let updatedDiagonalAnchor = pair.boardCopy.getAnchor(at: diagonalPosition),
-                      currentDiagonalAnchor.player != updatedDiagonalAnchor.player,
-                      anchorCouldBeCaptured(at: diagonalPosition, on: pair.boardCopy)
+            for ordinal in Ordinal.allCases {
+                let ordinalPosition = pair.anchor.getPosition(for: ordinal)
+                guard let currentOrdinalAnchor = board.getAnchor(at: ordinalPosition),
+                      let updatedOrdinalAnchor = pair.boardCopy.getAnchor(at: ordinalPosition),
+                      currentOrdinalAnchor.player != updatedOrdinalAnchor.player,
+                      anchorCouldBeCaptured(at: ordinalPosition, on: pair.boardCopy, from: player)
                 else {
                     continue
                 }
@@ -98,46 +98,54 @@ struct Automaton {
 
     private func filterCapturableMoves(from candidates: inout [MoveCandidate]) {
         let firstNoncapturableCandidate = candidates.first {
-            !anchorCouldBeCaptured(at: $0.position, on: board)
+            !anchorCouldBeCaptured(at: $0.position, on: board, from: player)
         }
         guard firstNoncapturableCandidate != nil else { return }
-        candidates.removeAll { anchorCouldBeCaptured(at: $0.position, on: board) }
+        candidates.removeAll { anchorCouldBeCaptured(at: $0.position, on: board, from: player) }
     }
 
-    private func anchorCouldBeCaptured(at position: Board.Position, on board: Board) -> Bool {
+    private func anchorCouldBeCaptured(
+        at position: Board.Position,
+        on board: Board,
+        from player: Game.Player
+    ) -> Bool {
         let anchorCandidate = Anchor(position: position, player: player)
-        let diagonals: [[Diagonal]] = [[.northwest, .southeast], [.northeast, .southwest]]
-        for pair in diagonals {
-            let capturePositions = pair.compactMap { diagonal in
-                anchorCandidate.getPosition(for: diagonal).selfIfValid
+        for opposites in Ordinal.opposites {
+            let capturePositions = [opposites.0, opposites.1].map { ordinal in
+                anchorCandidate.getPosition(for: ordinal)
             }
-            guard capturePositions.count == 2 else { continue }
+            guard capturePositions.allSatisfy({ $0.isValid }) else { continue }
             let capturePieces = capturePositions.compactMap { board.getPiece(at: $0) }
 
-            if capturePieces.count == 1,
+            guard capturePieces.count == 1,
                let anchor = capturePieces.first as? Anchor,
                anchor.player == player.opponent,
-               !anchorWouldCapture(anchorCandidate, anchor: anchor) {
-                return true
+               !anchorCandidateWouldCapture(anchorCandidate, existingAnchor: anchor, on: board)
+            else {
+                continue
             }
+            return true
         }
         return false
     }
 
-    private func anchorWouldCapture(_ anchorCandidate: Anchor, anchor: Anchor) -> Bool {
-        guard let diagonal = Diagonal.allCases.first(
-            where: { anchorCandidate.getPosition(for: $0) == anchor.position }
+    private func anchorCandidateWouldCapture(
+        _ anchorCandidate: Anchor,
+        existingAnchor: Anchor,
+        on board: Board
+    ) -> Bool {
+        guard let ordinal = Ordinal.allCases.first(
+            where: { anchorCandidate.getPosition(for: $0) == existingAnchor.position }
         ) else {
             return false
         }
 
-        let position = anchor.getPosition(for: diagonal)
-        let captureCandidate = board.getAnchor(at: position)
+        let captureCandidate = board.getAnchor(at: existingAnchor.getPosition(for: ordinal))
         return captureCandidate?.player == anchorCandidate.player
     }
 
     private func prioritizeCaptureBlockingMoves(for candidates: inout [MoveCandidate]) {
-        var anchorDiagonalPairs = [(anchor: Anchor, diagonal: Diagonal)]()
+        var anchorOrdinalPairs = [(anchor: Anchor, ordinal: Ordinal)]()
         var captureBlockingMoves = candidates.filter { candidate in
             var wouldBlock = false
             var boardCopy = board
@@ -145,25 +153,25 @@ struct Automaton {
             guard let anchorCandidate = moveResult?.newAnchor else { return false }
             let pieces: [Piece] = [anchorCandidate] + anchorCandidate.stems
             pieces.forEach { piece in
-                for diagonal in Diagonal.allCases {
-                    guard let anchor1 = board.getAnchor(at: piece.getPosition(for: diagonal)),
+                for ordinal in Ordinal.allCases {
+                    guard let anchor1 = board.getAnchor(at: piece.getPosition(for: ordinal)),
                           anchor1.player == player,
-                          let anchor2 = board.getAnchor(at: anchor1.getPosition(for: diagonal)),
+                          let anchor2 = board.getAnchor(at: anchor1.getPosition(for: ordinal)),
                           anchor2.player == player.opponent
                     else {
                         continue
                     }
-                    anchorDiagonalPairs.append((anchor2, diagonal))
+                    anchorOrdinalPairs.append((anchor2, ordinal))
                     wouldBlock = true
                     break
                 }
             }
             return wouldBlock
         }
-        anchorDiagonalPairs.forEach { pair in
-            let position = pair.anchor.getPosition(for: pair.diagonal)
+        anchorOrdinalPairs.forEach { pair in
+            let position = pair.anchor.getPosition(for: pair.ordinal)
             guard let candidate = candidates.first(where: { $0.position == position }),
-                  !anchorCouldBeCaptured(at: position, on: board)
+                  !anchorCouldBeCaptured(at: position, on: board, from: player)
             else {
                 return
             }

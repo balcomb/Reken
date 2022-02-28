@@ -24,6 +24,7 @@
 		B597BB2C279336A80081D417 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2B279336A80081D417 /* ScoreView.swift */; };
 		B597BB2E279340150081D417 /* Automaton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B597BB2D279340150081D417 /* Automaton.swift */; };
 		B5A9D9D127AEEB3D00565DCE /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9D9D027AEEB3D00565DCE /* Game.swift */; };
+		B5A9DA3C27C989D300565DCE /* Direction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9DA3B27C989D300565DCE /* Direction.swift */; };
 		B5ADF68527695A2A0036DA7E /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68427695A2A0036DA7E /* BoardView.swift */; };
 		B5ADF68727695A6D0036DA7E /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ADF68627695A6D0036DA7E /* CellView.swift */; };
 		B5E12477277FBBAA007222C3 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12476277FBBAA007222C3 /* Board.swift */; };
@@ -51,6 +52,7 @@
 		B597BB2B279336A80081D417 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		B597BB2D279340150081D417 /* Automaton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Automaton.swift; sourceTree = "<group>"; };
 		B5A9D9D027AEEB3D00565DCE /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
+		B5A9DA3B27C989D300565DCE /* Direction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Direction.swift; sourceTree = "<group>"; };
 		B5ADF68427695A2A0036DA7E /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		B5ADF68627695A6D0036DA7E /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
 		B5E12476277FBBAA007222C3 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				B58FD28F279771E900CF3A78 /* EventSubscriber.swift */,
 				B5A9D9D027AEEB3D00565DCE /* Game.swift */,
 				B57FCDBB276EAE4B00F8B39C /* Piece.swift */,
+				B5A9DA3B27C989D300565DCE /* Direction.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -254,6 +257,7 @@
 				B58FD2CD27ADAC2A00CF3A78 /* ControlView.swift in Sources */,
 				B5E124792780F71A007222C3 /* GameLogic.swift in Sources */,
 				B58FD28E2796548700CF3A78 /* ConfirmView.swift in Sources */,
+				B5A9DA3C27C989D300565DCE /* Direction.swift in Sources */,
 				B597BB2C279336A80081D417 /* ScoreView.swift in Sources */,
 				B57FCDBC276EAE4B00F8B39C /* Piece.swift in Sources */,
 				B58FD290279771E900CF3A78 /* EventSubscriber.swift in Sources */,
