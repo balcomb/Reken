@@ -55,8 +55,10 @@ class BoardView: UIView, EventSubscriber {
     private func handleUpdate(for game: Game) {
         guard game.progress == .new else { return }
         isUserInteractionEnabled = false
+        clearSelection()
         UIView.animate(withDuration: 0.5) {
             self.pieces.values.forEach { $0.alpha = 0 }
+            self.confirmView.alpha = 0
         } completion: { _ in
             self.isUserInteractionEnabled = true
             self.pieces.removeAll()
@@ -65,10 +67,16 @@ class BoardView: UIView, EventSubscriber {
 
     private func showConfirm(at position: Board.Position) {
         guard let cell = cells[position] else { return }
+        clearSelection()
         cell.setSelected(true)
-        if let currentPosition = selectedPosition { cells[currentPosition]?.setSelected(false) }
         selectedPosition = position
         confirmView.show(for: cell, isAlignedLeft: position.x < Board.size / 2)
+    }
+
+    private func clearSelection() {
+        guard let selectedPosition = selectedPosition else { return }
+        cells[selectedPosition]?.setSelected(false)
+        self.selectedPosition = nil
     }
 
     private func update(with moveResult: MoveResult) {
@@ -83,8 +91,7 @@ class BoardView: UIView, EventSubscriber {
 
     private func handleConfirmAction(_ action: ConfirmView.Action) {
         guard let position = selectedPosition else { return }
-        cells[position]?.setSelected(false)
-        selectedPosition = nil
+        clearSelection()
         guard action == .confirm else { return }
         dataSource.handleConfirmedSelection(at: position)
     }

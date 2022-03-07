@@ -14,10 +14,13 @@ struct Automaton {
 
     private let player: Game.Player
     private var board: Board
+    private let skillLevel: Settings.SkillLevel
+    private var scoreDiffAdjustment: Int { skillLevel == .basic ? 1 : 0 }
 
-    init(player: Game.Player, board: Board) {
+    init(player: Game.Player, board: Board, skillLevel: Settings.SkillLevel) {
         self.player = player
         self.board = board
+        self.skillLevel = skillLevel
     }
 
     func findMove() -> Board.Position? {
@@ -27,8 +30,8 @@ struct Automaton {
         filterCapturableMoves(from: &candidates)
         filterRecapturableMoves(from: &candidates)
         prioritizeCaptureBlockingMoves(for: &candidates)
-        let maxScoreDiff = candidates.map { $0.scoreDiff }.max()
-        candidates.removeAll { $0.scoreDiff != maxScoreDiff }
+        let maxScoreDiff = candidates.map { $0.scoreDiff }.max() ?? 0
+        candidates = candidates.filter { $0.scoreDiff >= maxScoreDiff - scoreDiffAdjustment }
         return candidates.randomElement()?.position
     }
 

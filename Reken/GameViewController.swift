@@ -7,13 +7,16 @@
 
 import UIKit
 import SnapKit
+import Combine
 
-class GameViewController: UIViewController {
+class GameViewController: UIViewController, EventSubscriber {
 
+    lazy var cancellables = Set<AnyCancellable>()
     private lazy var gameLogic = GameLogic()
     private lazy var scoreView = ScoreView(dataSource: gameLogic)
     private lazy var boardView = BoardView(dataSource: gameLogic)
     private lazy var controlView = ControlView(dataSource: gameLogic)
+    private lazy var settingsView = SettingsView(dataSource: gameLogic)
 
     override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
 
@@ -23,8 +26,22 @@ class GameViewController: UIViewController {
         view.addSubview(boardView)
         view.addSubview(scoreView)
         view.addSubview(controlView)
+        view.addSubview(settingsView)
         makeConstraints()
         gameLogic.startNewGame()
+        subscribe(to: gameLogic.settingsErrorPublisher) { [weak self] in
+            self?.showSettingErrorDialog()
+        }
+    }
+
+    private func showSettingErrorDialog() {
+        let alertController = UIAlertController(
+            title: "Sorry, your settings couldn't be saved",
+            message: nil,
+            preferredStyle: .alert
+        )
+        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alertController, animated: true)
     }
 
     private func makeConstraints() {
@@ -41,6 +58,9 @@ class GameViewController: UIViewController {
             make.top.equalTo(boardView.snp.bottom)
             make.left.right.equalToSuperview()
             make.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        settingsView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
     }
 }

@@ -27,11 +27,28 @@ class ControlView: UIView, EventSubscriber {
         return button
     }()
 
+    private lazy var settingsButton: UIButton = {
+        let button = UIButton(
+            type: .system,
+            primaryAction: UIAction(
+                handler: { [weak self] _ in self?.dataSource.handleSettingsRequest() }
+            )
+        )
+        button.setImage(UIImage(systemName: "gearshape.fill"), for: .normal)
+        button.tintColor = .lightGray
+        return button
+    }()
+
     convenience init(dataSource: GameDataSource) {
         self.init()
         self.dataSource = dataSource
         addSubview(playAgainButton)
+        addSubview(settingsButton)
         playAgainButton.snp.makeConstraints { $0.center.equalToSuperview() }
+        settingsButton.snp.makeConstraints { make in
+            make.right.bottom.equalToSuperview()
+            make.width.height.equalTo(44)
+        }
         layoutIfNeeded()
         playAgainButton.layer.cornerRadius = playAgainButton.frame.size.height / 2
         subscribe(to: dataSource.gameUpdatePublisher) { [weak self] game in
