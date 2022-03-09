@@ -126,10 +126,10 @@
 			children = (
 				B597BB2D279340150081D417 /* Automaton.swift */,
 				B5E12476277FBBAA007222C3 /* Board.swift */,
+				B5A9DA3B27C989D300565DCE /* Direction.swift */,
 				B58FD28F279771E900CF3A78 /* EventSubscriber.swift */,
 				B5A9D9D027AEEB3D00565DCE /* Game.swift */,
 				B57FCDBB276EAE4B00F8B39C /* Piece.swift */,
-				B5A9DA3B27C989D300565DCE /* Direction.swift */,
 				B5A9DA3F27D1261C00565DCE /* Settings.swift */,
 			);
 			path = Data;

@@ -12,11 +12,11 @@ import Combine
 class GameViewController: UIViewController, EventSubscriber {
 
     lazy var cancellables = Set<AnyCancellable>()
-    private lazy var gameLogic = GameLogic()
-    private lazy var scoreView = ScoreView(dataSource: gameLogic)
-    private lazy var boardView = BoardView(dataSource: gameLogic)
-    private lazy var controlView = ControlView(dataSource: gameLogic)
-    private lazy var settingsView = SettingsView(dataSource: gameLogic)
+    private lazy var dataSource: GameDataSource = GameLogic()
+    private lazy var scoreView = ScoreView(dataSource: dataSource)
+    private lazy var boardView = BoardView(dataSource: dataSource)
+    private lazy var controlView = ControlView(dataSource: dataSource)
+    private lazy var settingsView = SettingsView(dataSource: dataSource)
 
     override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
 
@@ -28,8 +28,8 @@ class GameViewController: UIViewController, EventSubscriber {
         view.addSubview(controlView)
         view.addSubview(settingsView)
         makeConstraints()
-        gameLogic.startNewGame()
-        subscribe(to: gameLogic.settingsErrorPublisher) { [weak self] in
+        dataSource.startNewGame()
+        subscribe(to: dataSource.settingsErrorPublisher) { [weak self] in
             self?.showSettingErrorDialog()
         }
     }

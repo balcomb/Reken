@@ -9,38 +9,68 @@ import Foundation
 import Combine
 
 protocol GameDataSource {
+    var selectedPositionPublisher: EventPublisher<Board.Position?> { get }
     var gameUpdatePublisher: EventPublisher<Game> { get }
     var moveResultPublisher: EventPublisher<MoveResult> { get }
     var settingsPublisher: EventPublisher<Settings> { get }
     var settingsIsVisiblePublisher: EventPublisher<Bool> { get }
     var settingsErrorPublisher: EventPublisher<Void> { get }
-    func isValidSelection(at position: Board.Position) -> Bool
-    func handleConfirmedSelection(at position: Board.Position)
     func startNewGame()
+    func handleSelectedPosition(_ position: Board.Position)
+    func handleConfirmAction(_ action: GameLogic.ConfirmAction)
     func handleSettingsRequest()
     func updateSettings<O: SettingsOption>(option: O)
 }
 
-extension GameLogic: GameDataSource {
+class GameLogic: GameDataSource {
 
-    var gameUpdatePublisher: EventPublisher<Game> { gameUpdateSubject.eraseToAnyPublisher() }
-    var moveResultPublisher: EventPublisher<MoveResult> { moveResultSubject.eraseToAnyPublisher() }
-    var settingsPublisher: EventPublisher<Settings> { settingsSubject.eraseToAnyPublisher() }
-    var settingsErrorPublisher: EventPublisher<Void> { settingsErrorSubject.eraseToAnyPublisher() }
-    var settingsIsVisiblePublisher: EventPublisher<Bool> {
-        settingsIsVisibleSubject.eraseToAnyPublisher()
+    lazy var selectedPositionPublisher = selectedPositionSubject.eraseToAnyPublisher()
+    lazy var gameUpdatePublisher = gameUpdateSubject.eraseToAnyPublisher()
+    lazy var moveResultPublisher = moveResultSubject.eraseToAnyPublisher()
+    lazy var settingsPublisher = settingsSubject.eraseToAnyPublisher()
+    lazy var settingsErrorPublisher = settingsErrorSubject.eraseToAnyPublisher()
+    lazy var settingsIsVisiblePublisher = settingsIsVisibleSubject.eraseToAnyPublisher()
+
+    private lazy var selectedPositionSubject = EventSubject<Board.Position?>()
+    private lazy var moveResultSubject = EventSubject<MoveResult>()
+    private lazy var gameUpdateSubject = EventSubject<Game>()
+    private lazy var settingsSubject = EventSubject<Settings>()
+    private lazy var settingsErrorSubject = EventSubject<Void>()
+    private lazy var settingsIsVisibleSubject = EventSubject<Bool>()
+
+    private var game: Game!
+    private var settings: Settings = .stored ?? .standard
+
+    private var selectedPosition: Board.Position? {
+        didSet {
+            selectedPositionSubject.send(selectedPosition)
+        }
     }
 
-    func isValidSelection(at position: Board.Position) -> Bool {
-        activePlayerIsHuman && game.board.isOpen(at: position)
+    private var activePlayerIsHuman: Bool {
+        settings.gameType == .twoPlayer || game.activePlayer == .blue
     }
 
-    func handleConfirmedSelection(at position: Board.Position) {
-        handleMove(at: position)
+    // MARK: data source methods
+
+    func handleSelectedPosition(_ position: Board.Position) {
+        guard position != selectedPosition &&
+                activePlayerIsHuman &&
+                game.board.isOpen(at: position)
+        else {
+            return
+        }
+        selectedPosition = position
+    }
+
+    func handleConfirmAction(_ action: GameLogic.ConfirmAction) {
+        if action == .confirm { handleMove(at: selectedPosition) }
+        selectedPosition = nil
     }
 
     func startNewGame() {
         game = Game()
+        selectedPosition = nil
         gameUpdateSubject.send(game)
         settingsIsVisibleSubject.send(false)
     }
@@ -59,24 +89,13 @@ extension GameLogic: GameDataSource {
         settings = updatedSettings
         settingsSubject.send(updatedSettings)
     }
-}
 
-class GameLogic {
+    // MARK: private methods
 
-    private var game: Game!
-    private var settings: Settings = .stored ?? .standard
-    private lazy var moveResultSubject = EventSubject<MoveResult>()
-    private lazy var gameUpdateSubject = EventSubject<Game>()
-    private lazy var settingsSubject = EventSubject<Settings>()
-    private lazy var settingsErrorSubject = EventSubject<Void>()
-    private lazy var settingsIsVisibleSubject = EventSubject<Bool>()
-
-    private var activePlayerIsHuman: Bool {
-        settings.gameType == .twoPlayer || game.activePlayer == .blue
-    }
-
-    private func handleMove(at position: Board.Position) {
-        guard let result = game.board.addAnchor(at: position, player: game.activePlayer) else {
+    private func handleMove(at position: Board.Position?) {
+        guard let position = position,
+              let result = game.board.addAnchor(at: position, player: game.activePlayer)
+        else {
             return
         }
         game.activePlayer = game.activePlayer.opponent
@@ -94,5 +113,12 @@ class GameLogic {
         )
         guard let position = automaton.findMove() else { return }
         handleMove(at: position)
+    }
+}
+
+extension GameLogic {
+
+    enum ConfirmAction {
+        case confirm, reject
     }
 }

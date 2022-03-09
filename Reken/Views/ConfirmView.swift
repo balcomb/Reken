@@ -10,8 +10,8 @@ import Combine
 
 class ConfirmView: UIView {
 
-    var actionPublisher: EventPublisher<Action> { actionSubject.eraseToAnyPublisher() }
-    private lazy var actionSubject = EventSubject<Action>()
+    lazy var actionPublisher = actionSubject.eraseToAnyPublisher()
+    private lazy var actionSubject = EventSubject<GameLogic.ConfirmAction>()
     private lazy var confirmButton = makeButton(for: .confirm)
     private lazy var rejectButton = makeButton(for: .reject)
     private var padding: CGFloat { 5 }
@@ -27,7 +27,6 @@ class ConfirmView: UIView {
     }
 
     func show(for cell: CellView, isAlignedLeft: Bool) {
-        animate(alpha: 1)
         snp.remakeConstraints { make in
             make.top.equalTo(cell.snp.bottom)
             make.trailing.equalTo(rejectButton).offset(padding)
@@ -38,6 +37,11 @@ class ConfirmView: UIView {
                 make.right.equalTo(cell)
             }
         }
+        animate(alpha: 1)
+    }
+
+    func hide() {
+        animate(alpha: 0)
     }
 
     private func animate(alpha: CGFloat) {
@@ -58,28 +62,17 @@ class ConfirmView: UIView {
         }
     }
 
-    private func makeButton(for event: Action) -> UIButton {
+    private func makeButton(for action: GameLogic.ConfirmAction) -> UIButton {
         let button = UIButton(
-            primaryAction: .init(handler: { [weak self] _ in self?.handleButton(for: event) })
+            type: .system,
+            primaryAction: .init(handler: { [weak self] _ in self?.actionSubject.send(action) })
         )
         let image = UIImage(
-            systemName: event == .confirm ? "checkmark" : "multiply",
+            systemName: action == .confirm ? "checkmark" : "multiply",
             withConfiguration: UIImage.SymbolConfiguration(weight: .black)
         )
         button.setImage(image, for: .normal)
-        button.tintColor = event == .confirm ? .white : .gameBackground
+        button.tintColor = action == .confirm ? .white : .gameBackground
         return button
-    }
-
-    private func handleButton(for event: Action) {
-        actionSubject.send(event)
-        animate(alpha: 0)
-    }
-}
-
-extension ConfirmView {
-
-    enum Action {
-        case confirm, reject
     }
 }
